@@ -69,14 +69,8 @@ Dashboard & Integrity Report Visualization
 
 ---
 
-## 🧪 Setup and Installation
 
-### 1️⃣ Clone the Repository
 
-```bash
-git clone [https://github.com/debojyoti10cc/Recruitix.git](https://github.com/debojyoti10cc/Recruitix.git)
-cd Recruitix
-````
 
 ### 2️⃣ Install Dependencies
 
@@ -176,7 +170,7 @@ Recruitix/
 | :--- | :--- |
 | **🎥 Demo Video** | [suspicious link removed] |
 | **📄 Research Paper** | [suspicious link removed] |
-| **💻 GitHub Repository** | [https://github.com/debojyoti10cc/Recruitix](https://github.com/debojyoti10cc/Recruitix) |
+
 
 -----
 
@@ -184,14 +178,8 @@ Recruitix/
 
 | Name | Role | Institution |
 | :--- | :--- | :--- |
-| **Debojyoti De Majumder** | Lead Developer & Researcher | IEM Kolkata |
-| **Rupsa Dhar** | Co-Developer & Tester | IEM Kolkata |
+| **Debangshu Chatterjee** | Lead Developer & Researcher | IEM Kolkata |
 
-### 💬 Acknowledgments
-
-Special thanks to **Prof. Dr. Moutushi Singh**, Head, Department of Computer Science and Engineering (AI), Institute of Engineering and Management, Kolkata, for guidance, mentorship, and continuous academic support.
-
------
 
 ## 🧾 License
 
