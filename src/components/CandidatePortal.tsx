@@ -77,7 +77,7 @@ const CandidatePortal = ({ onBack, userInfo }: CandidatePortalProps) => {
   }
 
   if (currentRound === 'hr') {
-    return <HRSimulation onComplete={(score: number) => handleRoundComplete('hr', score, score)} onBack={() => setCurrentRound('dashboard')} />;
+    return <HRSimulation onComplete={() => handleRoundComplete('hr', 85, 85)} onBack={() => setCurrentRound('dashboard')} />;
   }
 
   const overallProgress = (completedRounds.length / rounds.length) * 100;

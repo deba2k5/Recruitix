@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -6,34 +6,36 @@ import { BackgroundGradient } from '@/components/ui/background-gradient';
 import { Users, Shield, CheckCircle, ArrowRight, Code, Video, MessageSquare, Star, Quote, Sparkles, Zap, Globe, Lock } from 'lucide-react';
 import { FeatureDotCard } from '@/components/ui/feature-dot-card';
 import { ThemeToggle } from '@/components/ThemeToggle';
-import CandidatePortal from '@/components/CandidatePortal';
 import RecruiterPortal from '@/components/RecruiterPortal';
-import BiometricAuth from '@/components/BiometricAuth';
+import AuthGate from '@/components/auth/AuthGate';
+import EnrollFace from '@/components/auth/EnrollFace';
+import CandidateFlow from '@/components/exam/CandidateFlow';
 import { HeroScrollDemo } from '@/components/HeroScrollDemo';
 import { TimelineDemo } from '@/components/TimelineDemo';
 import { TestimonialsSection } from '@/components/TestimonialsSection';
 import { Footer } from '@/components/ui/modem-animated-footer';
 import { Twitter, Linkedin, Github, Mail, Brain } from 'lucide-react';
-import { User, signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { trackUserLogin, trackUserLogout } from '@/utils/userActivityTracker';
+import { trackUserLogin } from '@/utils/userActivityTracker';
+import { useAuthProfile } from '@/hooks/useAuthProfile';
+import { supabase } from '@/lib/supabase';
 
 const Index = () => {
-  const [userType, setUserType] = useState<'candidate' | 'recruiter' | null>(null);
+  // Recruiter/admin login is still Firebase-backed pending Phase 7 of the migration plan.
+  const [userType, setUserType] = useState<'recruiter' | null>(null);
   const [showAuth, setShowAuth] = useState(false);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [adminCredentials, setAdminCredentials] = useState({ id: '', password: '' });
   const [loginError, setLoginError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [userInfo, setUserInfo] = useState<any>(null);
 
-  const handleAuthComplete = (user: User, biometricId: string) => {
-    setUserInfo({ ...user, biometricId });
+  // Candidate identity/session now lives entirely in Supabase Auth + profiles.
+  const { session: candidateSession, profile: candidateProfile, loading: authLoading, refreshProfile } = useAuthProfile();
+
+  const handleCandidateLogout = async () => {
+    await supabase.auth.signOut();
     setShowAuth(false);
-    setUserType('candidate');
-    
-    // Track user login
-    trackUserLogin(user.uid, user.email || '', user.displayName || '', 'candidate', biometricId);
   };
 
   const handleAdminLogin = async () => {
@@ -66,33 +68,32 @@ const Index = () => {
     setShowAdminLogin(true);
   };
 
-  const handleLogout = async () => {
-    if (userInfo?.uid) {
-      await trackUserLogout(userInfo.uid);
-    }
+  const handleAdminLogout = () => {
     setUserType(null);
-    setUserInfo(null);
   };
 
-  useEffect(() => {
-    // Cleanup on component unmount
-    return () => {
-      if (userInfo?.uid && userType) {
-        trackUserLogout(userInfo.uid);
-      }
-    };
-  }, []);
-
-  if (showAuth) {
-    return <BiometricAuth onAuthComplete={handleAuthComplete} onBack={() => setShowAuth(false)} />;
+  // Mandatory face-enrollment gate: a signed-in candidate cannot reach any other screen
+  // until profiles.face_enrolled is true — no skip path.
+  if (candidateSession) {
+    if (authLoading) {
+      return (
+        <div className="min-h-screen bg-black flex items-center justify-center">
+          <p className="text-white">Loading your profile...</p>
+        </div>
+      );
+    }
+    if (candidateProfile && !candidateProfile.face_enrolled) {
+      return <EnrollFace onEnrolled={refreshProfile} />;
+    }
+    return <CandidateFlow onBack={handleCandidateLogout} userInfo={candidateProfile} />;
   }
 
-  if (userType === 'candidate') {
-    return <CandidatePortal onBack={handleLogout} userInfo={userInfo} />;
+  if (showAuth) {
+    return <AuthGate onBack={() => setShowAuth(false)} />;
   }
 
   if (userType === 'recruiter') {
-    return <RecruiterPortal onBack={handleLogout} />;
+    return <RecruiterPortal onBack={handleAdminLogout} />;
   }
 
   if (showAdminLogin) {

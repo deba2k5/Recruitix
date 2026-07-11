@@ -128,7 +128,7 @@ const LiveInterview = ({ onComplete, onBack }: LiveInterviewProps) => {
 
   const calculateScore = () => {
     let totalScore = 0;
-    let maxScore = questions.reduce((sum, q) => sum + q.points, 0);
+    const maxScore = questions.reduce((sum, q) => sum + q.points, 0);
 
     questions.forEach((q, index) => {
       const answer = answers[index];

@@ -1,0 +1,137 @@
+import * as faceapi from '@vladmandic/face-api';
+
+const MODEL_URL = '/models';
+
+let modelsPromise: Promise<void> | null = null;
+
+/** Loads the face-api.js identity models once (memoized) from same-origin /models — never a CDN. */
+export function loadFaceModels(): Promise<void> {
+  if (!modelsPromise) {
+    modelsPromise = Promise.all([
+      faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+      faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL),
+      faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
+    ]).then(() => undefined);
+  }
+  return modelsPromise;
+}
+
+const DETECTOR_OPTIONS = new faceapi.TinyFaceDetectorOptions();
+
+/** Full descriptor extraction — used for enrollment and identity (re-)verification. */
+export async function getFaceDescriptor(video: HTMLVideoElement): Promise<Float32Array | null> {
+  const result = await faceapi
+    .detectSingleFace(video, DETECTOR_OPTIONS)
+    .withFaceLandmarks(true)
+    .withFaceDescriptor();
+  return result?.descriptor ?? null;
+}
+
+export type FrameQualityReason = 'no_face' | 'multiple_faces' | 'off_center' | 'low_light';
+export interface FrameQuality {
+  ok: boolean;
+  reason?: FrameQualityReason;
+}
+
+export const GUIDANCE_MESSAGES: Record<FrameQualityReason, string> = {
+  no_face: 'Make sure your face is visible to the camera.',
+  multiple_faces: 'Make sure only you are visible.',
+  off_center: 'Center your face in the frame.',
+  low_light: 'Move to a better-lit area.',
+};
+
+const CENTER_TOLERANCE = 0.25; // face box center must be within 25% of frame half-dimension
+const MIN_AVG_LUMA = 60; // 0-255 scale; below this is treated as too dark
+
+let lumaCanvas: HTMLCanvasElement | null = null;
+
+function sampleAverageLuma(video: HTMLVideoElement): number {
+  if (!lumaCanvas) lumaCanvas = document.createElement('canvas');
+  const size = 32; // downsample — only need a rough brightness estimate
+  lumaCanvas.width = size;
+  lumaCanvas.height = size;
+  const ctx = lumaCanvas.getContext('2d', { willReadFrequently: true });
+  if (!ctx) return 255;
+  ctx.drawImage(video, 0, 0, size, size);
+  const { data } = ctx.getImageData(0, 0, size, size);
+  let total = 0;
+  for (let i = 0; i < data.length; i += 4) {
+    total += 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+  }
+  return total / (data.length / 4);
+}
+
+/** Gates enrollment/exam-gate capture on: exactly one face, roughly centered, adequate light. */
+export async function assessFrameQuality(video: HTMLVideoElement): Promise<FrameQuality> {
+  const detections = await faceapi.detectAllFaces(video, DETECTOR_OPTIONS);
+
+  if (detections.length === 0) return { ok: false, reason: 'no_face' };
+  if (detections.length > 1) return { ok: false, reason: 'multiple_faces' };
+
+  const box = detections[0].box;
+  const faceCenterX = box.x + box.width / 2;
+  const faceCenterY = box.y + box.height / 2;
+  const dx = Math.abs(faceCenterX - video.videoWidth / 2) / video.videoWidth;
+  const dy = Math.abs(faceCenterY - video.videoHeight / 2) / video.videoHeight;
+  if (dx > CENTER_TOLERANCE || dy > CENTER_TOLERANCE) return { ok: false, reason: 'off_center' };
+
+  if (sampleAverageLuma(video) < MIN_AVG_LUMA) return { ok: false, reason: 'low_light' };
+
+  return { ok: true };
+}
+
+export interface CaptureOptions {
+  samples?: number;
+  intervalMs?: number;
+  maxRetriesPerSample?: number;
+  onGuidance?: (reason: FrameQualityReason | null) => void;
+}
+
+/**
+ * Enrollment capture: 3-5 quality-gated samples ~1s apart, averaged into one template.
+ * Each sample slot retries (with guidance callback) until quality passes, rather than
+ * ever capturing a bad frame.
+ */
+export async function captureAveragedDescriptor(
+  video: HTMLVideoElement,
+  { samples = 5, intervalMs = 1000, maxRetriesPerSample = 15, onGuidance }: CaptureOptions = {},
+): Promise<Float32Array> {
+  const collected: Float32Array[] = [];
+
+  for (let i = 0; i < samples; i++) {
+    let attempt = 0;
+    for (;;) {
+      const quality = await assessFrameQuality(video);
+      if (quality.ok) {
+        onGuidance?.(null);
+        break;
+      }
+      onGuidance?.(quality.reason ?? 'no_face');
+      attempt++;
+      if (attempt >= maxRetriesPerSample) {
+        throw new Error(`quality_gate_failed:${quality.reason}`);
+      }
+      await new Promise((resolve) => setTimeout(resolve, 300));
+    }
+
+    const descriptor = await getFaceDescriptor(video);
+    if (descriptor) collected.push(descriptor);
+
+    if (i < samples - 1) {
+      await new Promise((resolve) => setTimeout(resolve, intervalMs));
+    }
+  }
+
+  if (collected.length === 0) {
+    throw new Error('no_descriptors_captured');
+  }
+
+  const length = collected[0].length;
+  const averaged = new Float32Array(length);
+  for (const descriptor of collected) {
+    for (let i = 0; i < length; i++) averaged[i] += descriptor[i];
+  }
+  for (let i = 0; i < length; i++) averaged[i] /= collected.length;
+
+  return averaged;
+}

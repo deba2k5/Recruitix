@@ -66,7 +66,7 @@ export function AnimatedPinDemo() {
         </div>
       </PinContainer>
 
-      <style jsx>{`
+      <style>{`
         @keyframes wave {
           0%, 100% {
             transform: translateY(0);

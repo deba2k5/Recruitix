@@ -1,0 +1,74 @@
+import { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { UserCheck } from 'lucide-react';
+import CompanySelect from './CompanySelect';
+import ExamFaceGate from './ExamFaceGate';
+import CandidatePortal from '@/components/CandidatePortal';
+
+interface CandidateFlowProps {
+  userInfo: unknown;
+  onBack: () => void;
+}
+
+type Step = 'select_company' | 'face_gate' | 'manual_review' | 'exam';
+
+/**
+ * Orchestrates company selection -> face+liveness gate -> exam. The 'exam' step still
+ * renders the legacy free-navigation CandidatePortal as a placeholder — replacing it with
+ * the sequential, question-bank-backed ExamRunner is the next piece of work (migration
+ * plan Phase 5), not yet built.
+ */
+const CandidateFlow = ({ userInfo, onBack }: CandidateFlowProps) => {
+  const [step, setStep] = useState<Step>('select_company');
+  const [sessionId, setSessionId] = useState<string | null>(null);
+
+  if (step === 'select_company') {
+    return (
+      <CompanySelect
+        onBack={onBack}
+        onSessionReady={(id) => {
+          setSessionId(id);
+          setStep('face_gate');
+        }}
+      />
+    );
+  }
+
+  if (step === 'face_gate' && sessionId) {
+    return (
+      <ExamFaceGate
+        sessionId={sessionId}
+        onUnlocked={() => setStep('exam')}
+        onManualReview={() => setStep('manual_review')}
+        onCancel={() => setStep('select_company')}
+      />
+    );
+  }
+
+  if (step === 'manual_review') {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center p-4">
+        <Card className="w-full max-w-md bg-slate-900 border-slate-700">
+          <CardHeader className="text-center space-y-2">
+            <UserCheck className="w-12 h-12 text-amber-400 mx-auto" />
+            <CardTitle className="text-white">Manual Review Required</CardTitle>
+            <CardDescription className="text-slate-300">
+              We couldn't verify you automatically after several attempts. An admin will review
+              your enrollment and unlock your exam shortly.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button onClick={() => setStep('select_company')} variant="outline" className="w-full bg-transparent border-slate-600 text-slate-300 hover:bg-slate-800">
+              Back
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return <CandidatePortal onBack={onBack} userInfo={userInfo} />;
+};
+
+export default CandidateFlow;
