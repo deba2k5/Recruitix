@@ -5,10 +5,10 @@
 
 insert into public.companies (name, slug, pass_threshold_pct, technical_duration_min, personal_duration_min, hr_duration_min)
 values
-  ('TCS', 'tcs', 60, 45, 30, 20),
-  ('Wipro', 'wipro', 60, 45, 30, 20),
-  ('Infosys', 'infosys', 60, 45, 30, 20),
-  ('General', 'general', 60, 45, 30, 20)
+  ('TCS', 'tcs', 60, 60, 45, 20),
+  ('Wipro', 'wipro', 60, 60, 45, 20),
+  ('Infosys', 'infosys', 60, 60, 45, 20),
+  ('General', 'general', 60, 60, 45, 20)
 on conflict (name) do nothing;
 
 with technical_questions(qtype, category, prompt, options, correct_answer, points) as (
@@ -39,6 +39,19 @@ with technical_questions(qtype, category, prompt, options, correct_answer, point
     ('mcq', 'DSA', 'Which sorting algorithm is stable?', '["Quick Sort","Heap Sort","Merge Sort","Selection Sort"]'::jsonb, 'Merge Sort', 2),
     ('mcq', 'Aptitude', 'If today is Monday, what day will it be after 100 days?', '["Monday","Tuesday","Wednesday","Thursday"]'::jsonb, 'Tuesday', 1)
 ),
+personal_questions(prompt, correct_answer, points) as (
+  values
+    ('Implement a function to reverse a linked list.', 'Iterative or recursive reversal', 10),
+    ('Find the longest palindromic substring in a given string.', 'Expand around centers or dynamic programming', 10),
+    ('Implement binary search in a sorted array.', 'Divide and conquer with two pointers', 8),
+    ('Detect if a linked list has a cycle.', E'Floyd\'s cycle detection (tortoise and hare)', 10),
+    ('Find the maximum depth of a binary tree.', 'Recursive DFS or iterative BFS', 8),
+    ('Merge two sorted arrays in-place.', 'Two pointers from end to beginning', 10),
+    ('Find the first non-repeating character in a string.', 'Hash map for frequency counting', 8),
+    ('Implement a stack using queues.', 'Two queues or one queue with rotation', 10),
+    ('Find the kth largest element in an array.', 'Quick select or heap', 10),
+    ('Check if two strings are anagrams.', 'Sorting or character frequency counting', 8)
+),
 hr_questions(category, prompt, correct_answer) as (
   values
     ('Behavioral', E'Tell me about yourself and why you\'re interested in this position.', 'background experience skills interest role motivation career goals'),
@@ -55,6 +68,9 @@ hr_questions(category, prompt, correct_answer) as (
 insert into public.question_bank (company_id, round, qtype, category, prompt, options, correct_answer, points)
 select c.id, 'technical', t.qtype, t.category, t.prompt, t.options, t.correct_answer, t.points
 from public.companies c cross join technical_questions t
+union all
+select c.id, 'personal', 'coding', 'DSA', p.prompt, null, p.correct_answer, p.points
+from public.companies c cross join personal_questions p
 union all
 select c.id, 'hr', 'behavioral', h.category, h.prompt, null, h.correct_answer, 1
 from public.companies c cross join hr_questions h;

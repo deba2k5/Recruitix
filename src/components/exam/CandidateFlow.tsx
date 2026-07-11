@@ -4,22 +4,16 @@ import { Button } from '@/components/ui/button';
 import { UserCheck } from 'lucide-react';
 import CompanySelect from './CompanySelect';
 import ExamFaceGate from './ExamFaceGate';
-import CandidatePortal from '@/components/CandidatePortal';
+import ExamRunner from './ExamRunner';
 
 interface CandidateFlowProps {
-  userInfo: unknown;
   onBack: () => void;
 }
 
 type Step = 'select_company' | 'face_gate' | 'manual_review' | 'exam';
 
-/**
- * Orchestrates company selection -> face+liveness gate -> exam. The 'exam' step still
- * renders the legacy free-navigation CandidatePortal as a placeholder — replacing it with
- * the sequential, question-bank-backed ExamRunner is the next piece of work (migration
- * plan Phase 5), not yet built.
- */
-const CandidateFlow = ({ userInfo, onBack }: CandidateFlowProps) => {
+/** Orchestrates company selection -> face+liveness gate -> continuously-proctored exam. */
+const CandidateFlow = ({ onBack }: CandidateFlowProps) => {
   const [step, setStep] = useState<Step>('select_company');
   const [sessionId, setSessionId] = useState<string | null>(null);
 
@@ -68,7 +62,11 @@ const CandidateFlow = ({ userInfo, onBack }: CandidateFlowProps) => {
     );
   }
 
-  return <CandidatePortal onBack={onBack} userInfo={userInfo} />;
+  if (step === 'exam' && sessionId) {
+    return <ExamRunner sessionId={sessionId} onExamComplete={onBack} />;
+  }
+
+  return null;
 };
 
 export default CandidateFlow;

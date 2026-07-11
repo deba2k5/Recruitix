@@ -85,7 +85,7 @@ const Index = () => {
     if (candidateProfile && !candidateProfile.face_enrolled) {
       return <EnrollFace onEnrolled={refreshProfile} />;
     }
-    return <CandidateFlow onBack={handleCandidateLogout} userInfo={candidateProfile} />;
+    return <CandidateFlow onBack={handleCandidateLogout} />;
   }
 
   if (showAuth) {

@@ -95,8 +95,8 @@ create table public.companies (
   name text not null unique,          -- 'TCS', 'Wipro', 'Infosys', 'General'
   slug text not null unique,
   pass_threshold_pct int not null default 60,
-  technical_duration_min int not null default 45,
-  personal_duration_min int not null default 30,
+  technical_duration_min int not null default 60,
+  personal_duration_min int not null default 45,
   hr_duration_min int not null default 20,
   is_active boolean not null default true,
   created_at timestamptz not null default now()
@@ -108,7 +108,7 @@ create policy "companies_write_recruiter" on public.companies for all using (pub
 create table public.question_bank (
   id uuid primary key default gen_random_uuid(),
   company_id uuid not null references public.companies(id) on delete cascade,
-  round text not null check (round in ('technical','hr')),
+  round text not null check (round in ('technical','personal','hr')),
   qtype text not null check (qtype in ('mcq','coding','behavioral')),
   category text,
   prompt text not null,
