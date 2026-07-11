@@ -147,11 +147,85 @@ Recruitix/
 │   └── App.tsx
 ├── public/
 │   └── assets/
+├── exam_proctor.py          ← Python face recognition proctoring
+├── requirements.txt         ← Python dependencies
+├── snapshots/               ← Violation snapshots (auto-created)
+├── violations.jsonl         ← Violation log (auto-created)
 ├── .env.example
 ├── package.json
 ├── vite.config.ts
 └── README.md
 ```
+
+-----
+
+## 🧬 Python Face Recognition Proctoring Module
+
+Recruitix includes a standalone **Python-based exam proctoring system** (`exam_proctor.py`) that uses real face recognition to verify and continuously monitor student identity during exams.
+
+### How It Works
+
+| Library | Purpose |
+| :--- | :--- |
+| **MediaPipe FaceMesh** | Face presence, face count, head pose estimation (yaw/pitch). Cannot verify identity. |
+| **face_recognition (dlib)** | 128-d face embeddings for identity verification against the registered student photo. |
+| **OpenCV** | Camera capture, frame processing, and live preview window. |
+
+### Features
+
+* ✅ **Identity Gate** — Student must match their registered photo before the exam can start (30s timeout)
+* ✅ **Continuous Identity Re-verification** — Periodically checks that the same person is still at the camera
+* ✅ **Face Count Monitoring** — Detects if additional people appear in frame
+* ✅ **Head Pose Estimation** — Flags when student looks away (yaw > 30° or pitch > 25°)
+* ✅ **Debounced Violation System** — 3 consecutive strikes before confirming a violation
+* ✅ **JSONL Violation Log** — Machine-readable log with timestamps and snapshot paths
+* ✅ **Frame Snapshots** — Captures the exact frame at the moment of each violation
+
+### Installation
+
+```bash
+# Install Python dependencies
+pip install -r requirements.txt
+```
+
+> **Windows Note:** `face_recognition` requires **dlib**, which needs **CMake** and a C++ compiler.
+> Install CMake first: `pip install cmake`, or use conda:
+> ```bash
+> conda install -c conda-forge dlib face_recognition
+> ```
+
+### Usage
+
+```bash
+# Basic usage — verify against student photo and monitor
+python exam_proctor.py --reference student_photo.jpg
+
+# Use a specific camera (e.g., external webcam)
+python exam_proctor.py --reference student_photo.jpg --camera 1
+
+# Run headless (no preview window)
+python exam_proctor.py --reference student_photo.jpg --no-window
+```
+
+### Output Files
+
+| File | Description |
+| :--- | :--- |
+| `violations.jsonl` | One JSON line per confirmed violation (type, message, timestamp, snapshot path) |
+| `snapshots/*.jpg` | Frame captured at the moment of each violation |
+
+### Configuration
+
+Key parameters can be adjusted at the top of `exam_proctor.py`:
+
+| Parameter | Default | Description |
+| :--- | :--- | :--- |
+| `MATCH_TOLERANCE` | 0.55 | Face distance threshold; lower = stricter |
+| `IDENTITY_CHECK_EVERY_S` | 8 | Seconds between identity re-checks |
+| `PRESENCE_CHECK_EVERY_S` | 1.0 | Seconds between face count / pose checks |
+| `STRIKES_TO_VIOLATION` | 3 | Consecutive failures before flagging |
+| `MAX_YAW_DEG` | 30 | Max head turn (left/right) in degrees |
+| `MAX_PITCH_DEG` | 25 | Max head tilt (up/down) in degrees |
 
 -----
 
