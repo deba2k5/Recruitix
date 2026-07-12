@@ -242,6 +242,7 @@ Key parameters can be adjusted at the top of `exam_proctor.py`:
 
 | Resource | Link |
 | :--- | :--- |
+| **🚀 Live App** | [https://recruitix-eight.vercel.app/](https://recruitix-eight.vercel.app/) |
 | **🎥 Demo Video** | [suspicious link removed] |
 | **📄 Research Paper** | [suspicious link removed] |
 
