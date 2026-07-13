@@ -2,10 +2,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { AlertTriangle, CheckCircle2 } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { apiGet, apiPost } from '@/lib/api';
 import { loadFaceModels, getFaceDescriptor } from '@/lib/faceEngine';
 import { loadFaceLandmarker, detectFrame } from '@/lib/faceMesh';
-import { createStrikeTracker, createViolationPolicy, type ViolationType, type ConfirmedViolation } from '@/utils/proctorEngine';
+import { createStrikeTracker, createViolationPolicy, type ConfirmedViolation } from '@/utils/proctorEngine';
 import { fetchRoundQuestions, submitRoundResponses, recordRoundScore, scoreAnswer, type QuestionBankRow, type RoundName } from '@/lib/examRounds';
 import RoundView from './RoundView';
 
@@ -15,15 +15,15 @@ interface ExamRunnerProps {
 }
 
 interface SessionInfo {
-  company_id: string;
-  current_round: RoundName | null;
+  companyId: string;
+  currentRound: RoundName | null;
   status: string;
 }
 
 interface CompanyDurations {
-  technical_duration_min: number;
-  personal_duration_min: number;
-  hr_duration_min: number;
+  technicalDurationMin: number;
+  personalDurationMin: number;
+  hrDurationMin: number;
 }
 
 const PRESENCE_CHECK_MS = 1000;
@@ -37,10 +37,20 @@ const ROUND_TITLES: Record<RoundName, string> = {
   hr: 'HR Round',
 };
 
+function captureBase64Jpeg(video: HTMLVideoElement, canvas: HTMLCanvasElement): string | null {
+  canvas.width = video.videoWidth || 320;
+  canvas.height = video.videoHeight || 240;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return null;
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  // dataURL is "data:image/jpeg;base64,<...>" — server only wants the payload after the comma.
+  return canvas.toDataURL('image/jpeg', 0.7).split(',')[1] ?? null;
+}
+
 /**
  * Owns the camera + continuous proctoring for the whole exam session (never torn down
  * between rounds), and sequentially renders Technical -> Personal -> HR content sourced
- * from question_bank, persisting every answer to exam_responses.
+ * from the question bank, persisting every answer to examResponses.
  */
 const ExamRunner = ({ sessionId, onExamComplete }: ExamRunnerProps) => {
   const [session, setSession] = useState<SessionInfo | null>(null);
@@ -53,7 +63,6 @@ const ExamRunner = ({ sessionId, onExamComplete }: ExamRunnerProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const userIdRef = useRef<string | null>(null);
   const strikeTracker = useRef(createStrikeTracker());
   const violationPolicy = useRef(createViolationPolicy());
   const presenceIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -66,49 +75,30 @@ const ExamRunner = ({ sessionId, onExamComplete }: ExamRunnerProps) => {
     streamRef.current?.getTracks().forEach((t) => t.stop());
   }, []);
 
-  const captureSnapshotPath = useCallback(async (): Promise<string | null> => {
-    if (!videoRef.current || !userIdRef.current) return null;
-    if (!canvasRef.current) canvasRef.current = document.createElement('canvas');
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    canvas.width = video.videoWidth || 320;
-    canvas.height = video.videoHeight || 240;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return null;
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    const blob: Blob | null = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.7));
-    if (!blob) return null;
-
-    const path = `${userIdRef.current}/${sessionId}/${Date.now()}.jpg`;
-    const { error } = await supabase.storage.from('violation-snapshots').upload(path, blob, { contentType: 'image/jpeg' });
-    return error ? null : path;
-  }, [sessionId]);
-
   const recordViolation = useCallback(
     async (violation: ConfirmedViolation) => {
       if (endedRef.current) return;
       setLiveViolations((prev) => [...prev, violation]);
 
-      const snapshotPath = await captureSnapshotPath();
-      await supabase.from('violations').insert({
-        session_id: sessionId,
-        user_id: userIdRef.current,
+      if (!canvasRef.current) canvasRef.current = document.createElement('canvas');
+      const snapshotBase64 = videoRef.current ? captureBase64Jpeg(videoRef.current, canvasRef.current) : null;
+
+      await apiPost(`/api/exam/sessions/${sessionId}/violations`, {
         type: violation.type,
         severity: violation.severity,
         message: violation.message,
-        snapshot_path: snapshotPath,
+        snapshotBase64,
       });
 
       const policyResult = violationPolicy.current.record();
       if (policyResult.shouldAutoSubmit) {
         endedRef.current = true;
         stopEverything();
-        await supabase.rpc('auto_submit_exam_session', { p_session_id: sessionId });
+        await apiPost(`/api/exam/sessions/${sessionId}/auto-submit`);
         setEnded('auto_submitted');
       }
     },
-    [sessionId, captureSnapshotPath, stopEverything],
+    [sessionId, stopEverything],
   );
 
   const handleTabHidden = useCallback(() => {
@@ -120,23 +110,12 @@ const ExamRunner = ({ sessionId, onExamComplete }: ExamRunnerProps) => {
     let cancelled = false;
 
     (async () => {
-      const { data: userData } = await supabase.auth.getUser();
-      userIdRef.current = userData.user?.id ?? null;
-
-      const { data: sessionRow } = await supabase
-        .from('exam_sessions')
-        .select('company_id, current_round, status')
-        .eq('id', sessionId)
-        .maybeSingle();
+      const { session: sessionRow } = await apiGet<{ session: SessionInfo }>(`/api/exam/sessions/${sessionId}`);
       if (cancelled || !sessionRow) return;
-      setSession(sessionRow as SessionInfo);
+      setSession(sessionRow);
 
-      const { data: companyRow } = await supabase
-        .from('companies')
-        .select('technical_duration_min, personal_duration_min, hr_duration_min')
-        .eq('id', sessionRow.company_id)
-        .maybeSingle();
-      if (!cancelled && companyRow) setDurations(companyRow as CompanyDurations);
+      const { company } = await apiGet<{ company: CompanyDurations }>(`/api/companies/${sessionRow.companyId}`);
+      if (!cancelled && company) setDurations(company);
 
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
@@ -187,10 +166,8 @@ const ExamRunner = ({ sessionId, onExamComplete }: ExamRunnerProps) => {
         if (!videoRef.current || endedRef.current) return;
         const descriptor = await getFaceDescriptor(videoRef.current);
         if (!descriptor) return;
-        const { data, error } = await supabase.functions.invoke('match-face', {
-          body: { embedding: Array.from(descriptor) },
-        });
-        if (error || !data) return;
+        const data = await apiPost<{ match: boolean }>('/api/face/match', { embedding: Array.from(descriptor) }).catch(() => null);
+        if (!data) return;
         if (data.match) {
           strikeTracker.current.clear('IDENTITY_MISMATCH');
         } else {
@@ -211,17 +188,17 @@ const ExamRunner = ({ sessionId, onExamComplete }: ExamRunnerProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionId]);
 
-  // Fetch this round's questions whenever current_round changes.
+  // Fetch this round's questions whenever currentRound changes.
   useEffect(() => {
-    if (!session?.company_id || !session.current_round) return;
-    fetchRoundQuestions(session.company_id, session.current_round).then(setQuestions);
-  }, [session?.company_id, session?.current_round]);
+    if (!session?.companyId || !session.currentRound) return;
+    fetchRoundQuestions(session.companyId, session.currentRound).then(setQuestions);
+  }, [session?.companyId, session?.currentRound]);
 
   const handleRoundSubmit = async (round: RoundName, result: { score: number; pct: number; answers: Record<string, string> }) => {
     await submitRoundResponses(
+      sessionId,
       questions.map((q) => ({
-        session_id: sessionId,
-        question_id: q.id,
+        questionId: q.id,
         round,
         answer: result.answers[q.id] ?? '',
         score: scoreAnswer(q, result.answers[q.id] ?? ''),
@@ -229,11 +206,7 @@ const ExamRunner = ({ sessionId, onExamComplete }: ExamRunnerProps) => {
     );
     await recordRoundScore(sessionId, round, result.score, result.pct);
 
-    const { data: updated } = await supabase
-      .from('exam_sessions')
-      .select('company_id, current_round, status')
-      .eq('id', sessionId)
-      .maybeSingle();
+    const { session: updated } = await apiGet<{ session: SessionInfo }>(`/api/exam/sessions/${sessionId}`);
 
     if (!updated || updated.status === 'submitted') {
       endedRef.current = true;
@@ -241,7 +214,7 @@ const ExamRunner = ({ sessionId, onExamComplete }: ExamRunnerProps) => {
       setEnded('submitted');
       return;
     }
-    setSession(updated as SessionInfo);
+    setSession(updated);
   };
 
   if (ended) {
@@ -269,7 +242,7 @@ const ExamRunner = ({ sessionId, onExamComplete }: ExamRunnerProps) => {
     );
   }
 
-  if (loading || !session?.current_round || !durations) {
+  if (loading || !session?.currentRound || !durations) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <p className="text-white">Loading your exam...</p>
@@ -278,11 +251,11 @@ const ExamRunner = ({ sessionId, onExamComplete }: ExamRunnerProps) => {
   }
 
   const durationMin =
-    session.current_round === 'technical'
-      ? durations.technical_duration_min
-      : session.current_round === 'personal'
-        ? durations.personal_duration_min
-        : durations.hr_duration_min;
+    session.currentRound === 'technical'
+      ? durations.technicalDurationMin
+      : session.currentRound === 'personal'
+        ? durations.personalDurationMin
+        : durations.hrDurationMin;
 
   return (
     <div className="relative">
@@ -299,13 +272,13 @@ const ExamRunner = ({ sessionId, onExamComplete }: ExamRunnerProps) => {
         </div>
       )}
 
-      <Badge className="fixed top-4 left-4 z-50 bg-slate-800 text-white">{ROUND_TITLES[session.current_round]}</Badge>
+      <Badge className="fixed top-4 left-4 z-50 bg-slate-800 text-white">{ROUND_TITLES[session.currentRound]}</Badge>
 
       <RoundView
-        title={ROUND_TITLES[session.current_round]}
+        title={ROUND_TITLES[session.currentRound]}
         durationMin={durationMin}
         questions={questions}
-        onSubmit={(result) => handleRoundSubmit(session.current_round as RoundName, result)}
+        onSubmit={(result) => handleRoundSubmit(session.currentRound as RoundName, result)}
       />
     </div>
   );

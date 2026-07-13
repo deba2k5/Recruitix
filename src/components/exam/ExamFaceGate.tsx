@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Eye, ShieldAlert } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { apiPost } from '@/lib/api';
 import { loadFaceModels, getFaceDescriptor } from '@/lib/faceEngine';
 import { loadFaceLandmarker, detectFrame } from '@/lib/faceMesh';
 import { createBlinkDetector } from '@/lib/liveness';
@@ -89,10 +89,10 @@ const ExamFaceGate = ({ sessionId, onUnlocked, onManualReview, onCancel }: ExamF
         return;
       }
 
-      const { data, error } = await supabase.functions.invoke('unlock-exam-session', {
-        body: { session_id: sessionId, embedding: Array.from(descriptor), liveness_passed: livenessPassed },
-      });
-      if (error) throw error;
+      const data = await apiPost<{ unlocked: boolean; reason?: string; attemptsRemaining?: number }>(
+        `/api/exam/sessions/${sessionId}/unlock`,
+        { embedding: Array.from(descriptor), livenessPassed },
+      );
 
       if (data.unlocked) {
         streamRef.current?.getTracks().forEach((t) => t.stop());
@@ -106,7 +106,7 @@ const ExamFaceGate = ({ sessionId, onUnlocked, onManualReview, onCancel }: ExamF
         return;
       }
 
-      setAttemptsRemaining(data.attempts_remaining ?? null);
+      setAttemptsRemaining(data.attemptsRemaining ?? null);
       setMessage(
         data.reason === 'liveness'
           ? "We couldn't confirm liveness — please blink clearly when prompted."

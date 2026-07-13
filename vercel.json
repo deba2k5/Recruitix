@@ -3,6 +3,10 @@
   "installCommand": "npm ci --production=false",
   "rewrites": [
     {
+      "source": "/api/(.*)",
+      "destination": "/api"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Camera, CheckCircle, AlertCircle } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { apiPost } from '@/lib/api';
 import { loadFaceModels, captureAveragedDescriptor, GUIDANCE_MESSAGES, type FrameQualityReason } from '@/lib/faceEngine';
 
 interface EnrollFaceProps {
@@ -77,10 +77,7 @@ const EnrollFace = ({ onEnrolled }: EnrollFaceProps) => {
         },
       });
 
-      const { error } = await supabase.rpc('enroll_face_embedding', {
-        p_embedding: Array.from(descriptor),
-      });
-      if (error) throw error;
+      await apiPost('/api/face/enroll', { embedding: Array.from(descriptor) });
 
       setProgress(100);
       setStatus('complete');

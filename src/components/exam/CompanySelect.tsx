@@ -2,16 +2,16 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Building2, ArrowRight } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { apiGet, apiPost } from '@/lib/api';
 
 interface Company {
   id: string;
   name: string;
   slug: string;
-  pass_threshold_pct: number;
-  technical_duration_min: number;
-  personal_duration_min: number;
-  hr_duration_min: number;
+  passThresholdPct: number;
+  technicalDurationMin: number;
+  personalDurationMin: number;
+  hrDurationMin: number;
 }
 
 interface CompanySelectProps {
@@ -19,7 +19,7 @@ interface CompanySelectProps {
   onBack: () => void;
 }
 
-/** Lists active companies; picking one creates (or resumes) an exam_sessions row and hands off to the face gate. */
+/** Lists active companies; picking one creates (or resumes) an exam session and hands off to the face gate. */
 const CompanySelect = ({ onSessionReady, onBack }: CompanySelectProps) => {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,49 +27,19 @@ const CompanySelect = ({ onSessionReady, onBack }: CompanySelectProps) => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    supabase
-      .from('companies')
-      .select('id, name, slug, pass_threshold_pct, technical_duration_min, personal_duration_min, hr_duration_min')
-      .eq('is_active', true)
-      .order('name')
-      .then(({ data, error: fetchError }) => {
-        if (fetchError) setError(fetchError.message);
-        setCompanies((data as Company[]) ?? []);
-        setLoading(false);
-      });
+    apiGet<{ companies: Company[] }>('/api/companies')
+      .then(({ companies }) => setCompanies(companies))
+      .catch((err) => setError(err instanceof Error ? err.message : 'Could not load companies.'))
+      .finally(() => setLoading(false));
   }, []);
 
   const handleSelect = async (company: Company) => {
     setStarting(company.id);
     setError('');
     try {
-      const { data: userData } = await supabase.auth.getUser();
-      const userId = userData.user?.id;
-      if (!userId) throw new Error('Not signed in.');
-
-      // Resume an unfinished attempt for this company if one exists, else start a new one.
-      const { data: existing } = await supabase
-        .from('exam_sessions')
-        .select('id')
-        .eq('user_id', userId)
-        .eq('company_id', company.id)
-        .in('status', ['face_gate_pending', 'pending_manual_review', 'in_progress'])
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (existing) {
-        onSessionReady(existing.id);
-        return;
-      }
-
-      const { data: created, error: insertError } = await supabase
-        .from('exam_sessions')
-        .insert({ user_id: userId, company_id: company.id })
-        .select('id')
-        .single();
-      if (insertError) throw insertError;
-      onSessionReady(created.id);
+      // Server resumes an unfinished attempt for this company if one exists, else creates one.
+      const { sessionId } = await apiPost<{ sessionId: string }>('/api/exam/sessions', { companyId: company.id });
+      onSessionReady(sessionId);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not start this exam. Please try again.');
       setStarting(null);
@@ -99,7 +69,7 @@ const CompanySelect = ({ onSessionReady, onBack }: CompanySelectProps) => {
                   <div>
                     <CardTitle className="text-white">{company.name}</CardTitle>
                     <CardDescription className="text-slate-400">
-                      {company.technical_duration_min + company.personal_duration_min + company.hr_duration_min} min · pass at {company.pass_threshold_pct}%
+                      {company.technicalDurationMin + company.personalDurationMin + company.hrDurationMin} min · pass at {company.passThresholdPct}%
                     </CardDescription>
                   </div>
                 </CardHeader>

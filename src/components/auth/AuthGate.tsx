@@ -2,14 +2,15 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Mail, Lock, User as UserIcon, Calendar } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { apiPost, setToken } from '@/lib/api';
 
 interface AuthGateProps {
   onBack: () => void;
+  onAuthenticated: () => Promise<void> | void;
 }
 
-/** Plain Supabase email/password signup + sign-in. Face verification happens later, at the exam gate. */
-const AuthGate = ({ onBack }: AuthGateProps) => {
+/** Plain email/password signup + sign-in against the Express API. Face verification happens later, at the exam gate. */
+const AuthGate = ({ onBack, onAuthenticated }: AuthGateProps) => {
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -25,18 +26,11 @@ const AuthGate = ({ onBack }: AuthGateProps) => {
     setError('');
     setIsLoading(true);
     try {
-      if (mode === 'signup') {
-        const { error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { data: { display_name: name, date_of_birth: dob } },
-        });
-        if (signUpError) throw signUpError;
-      } else {
-        const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-        if (signInError) throw signInError;
-      }
-      // Session change is picked up reactively by useAuthProfile in the parent — no callback needed.
+      const path = mode === 'signup' ? '/api/auth/signup' : '/api/auth/login';
+      const body = mode === 'signup' ? { name, email, dateOfBirth: dob, password } : { email, password };
+      const { token } = await apiPost<{ token: string }>(path, body);
+      setToken(token);
+      await onAuthenticated();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Authentication failed. Please try again.');
     } finally {

@@ -19,10 +19,10 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { trackUserLogin } from '@/utils/userActivityTracker';
 import { useAuthProfile } from '@/hooks/useAuthProfile';
-import { supabase } from '@/lib/supabase';
+import { clearToken, getToken } from '@/lib/api';
 
 const Index = () => {
-  // Recruiter/admin login is still Firebase-backed pending Phase 7 of the migration plan.
+  // Recruiter/admin login is still Firebase-backed pending a later migration phase.
   const [userType, setUserType] = useState<'recruiter' | null>(null);
   const [showAuth, setShowAuth] = useState(false);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
@@ -30,12 +30,13 @@ const Index = () => {
   const [loginError, setLoginError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Candidate identity/session now lives entirely in Supabase Auth + profiles.
-  const { session: candidateSession, profile: candidateProfile, loading: authLoading, refreshProfile } = useAuthProfile();
+  // Candidate identity/session lives in a JWT (localStorage) + the Express API's /auth/me.
+  const { profile: candidateProfile, loading: authLoading, refreshProfile } = useAuthProfile();
 
-  const handleCandidateLogout = async () => {
-    await supabase.auth.signOut();
+  const handleCandidateLogout = () => {
+    clearToken();
     setShowAuth(false);
+    refreshProfile();
   };
 
   const handleAdminLogin = async () => {
@@ -73,8 +74,9 @@ const Index = () => {
   };
 
   // Mandatory face-enrollment gate: a signed-in candidate cannot reach any other screen
-  // until profiles.face_enrolled is true — no skip path.
-  if (candidateSession) {
+  // until faceEnrolled is true — no skip path. getToken() (synchronous) gates on whether a
+  // JWT exists at all; authLoading covers the async /auth/me round-trip that resolves it.
+  if (getToken()) {
     if (authLoading) {
       return (
         <div className="min-h-screen bg-black flex items-center justify-center">
@@ -82,14 +84,18 @@ const Index = () => {
         </div>
       );
     }
-    if (candidateProfile && !candidateProfile.face_enrolled) {
+    if (candidateProfile && !candidateProfile.faceEnrolled) {
       return <EnrollFace onEnrolled={refreshProfile} />;
     }
-    return <CandidateFlow onBack={handleCandidateLogout} />;
+    if (candidateProfile) {
+      return <CandidateFlow onBack={handleCandidateLogout} />;
+    }
+    // Token existed but /auth/me rejected it (expired/invalid) — useAuthProfile already
+    // cleared it, so fall through to the marketing/auth screens below.
   }
 
   if (showAuth) {
-    return <AuthGate onBack={() => setShowAuth(false)} />;
+    return <AuthGate onBack={() => setShowAuth(false)} onAuthenticated={refreshProfile} />;
   }
 
   if (userType === 'recruiter') {
