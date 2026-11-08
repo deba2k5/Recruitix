@@ -32,6 +32,7 @@ async function deleteSessionData(db, session) {
     db.collection('speakingRecordings').deleteMany({ sessionId }),
     db.collection('voiceInterviewResponses').deleteMany({ sessionId }),
     db.collection('faceGateAttempts').deleteMany({ sessionId }),
+    db.collection('questionBank').deleteMany({ sessionId }),
     db.collection('examSessions').deleteOne({ _id: sessionId }),
   ]);
   return responses.deletedCount;

@@ -360,6 +360,7 @@ const ExamRunner = ({ sessionId, onExamComplete }: ExamRunnerProps) => {
           sessionId={sessionId}
           durationMin={durationMin}
           questions={questions}
+          onQuestionsUpdate={setQuestions}
           onSubmit={(result) => handleRoundSubmit('technical_interview', result)}
         />
       ) : <RoundView

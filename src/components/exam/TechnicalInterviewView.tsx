@@ -13,12 +13,13 @@ interface TechnicalInterviewViewProps {
   sessionId: string;
   durationMin: number;
   questions: QuestionBankRow[];
+  onQuestionsUpdate: (questions: QuestionBankRow[]) => void;
   onSubmit: (result: { score: number; pct: number; answers: Record<string, string> }) => void;
 }
 
 const formatTime = (seconds: number) => `${Math.floor(seconds / 60)}:${(seconds % 60).toString().padStart(2, '0')}`;
 
-const TechnicalInterviewView = ({ sessionId, durationMin, questions, onSubmit }: TechnicalInterviewViewProps) => {
+const TechnicalInterviewView = ({ sessionId, durationMin, questions, onQuestionsUpdate, onSubmit }: TechnicalInterviewViewProps) => {
   const [cvName, setCvName] = useState('');
   const [cvKeywords, setCvKeywords] = useState<string[]>([]);
   const [cvError, setCvError] = useState('');
@@ -59,19 +60,29 @@ const TechnicalInterviewView = ({ sessionId, durationMin, questions, onSubmit }:
           binary += String.fromCharCode(...bytes.subarray(index, Math.min(index + chunkSize, bytes.length)));
         }
         const fileBase64 = btoa(binary);
-        const result = await apiPost<{ keywords: string[] }>(`/api/exam/sessions/${sessionId}/cv`, {
+        const result = await apiPost<{ keywords: string[]; questions: QuestionBankRow[] }>(`/api/exam/sessions/${sessionId}/cv`, {
           fileName: file.name,
           fileBase64,
           contentType: 'application/pdf',
         });
         setCvName(file.name);
         setCvKeywords(result.keywords);
+        if (result.questions.length) {
+          onQuestionsUpdate(result.questions);
+          setCurrentIndex(0);
+          setAnswers({});
+        }
         return;
       }
       const text = await file.text();
-      const result = await apiPost<{ keywords: string[] }>(`/api/exam/sessions/${sessionId}/cv`, { fileName: file.name, text });
+      const result = await apiPost<{ keywords: string[]; questions: QuestionBankRow[] }>(`/api/exam/sessions/${sessionId}/cv`, { fileName: file.name, text });
       setCvName(file.name);
       setCvKeywords(result.keywords);
+      if (result.questions.length) {
+        onQuestionsUpdate(result.questions);
+        setCurrentIndex(0);
+        setAnswers({});
+      }
     } catch (error) {
       setCvError(error instanceof Error ? error.message : 'Unable to upload the CV.');
     }

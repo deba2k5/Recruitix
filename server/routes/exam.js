@@ -294,7 +294,11 @@ router.post('/sessions/:id/responses', requireAuth, loadOwnedSession, asyncHandl
     createdAt: new Date(),
   }));
 
-  router.post('/sessions/:id/cv', requireAuth, loadOwnedSession, asyncHandler(async (req, res) => {
+  await req.db.collection('examResponses').insertMany(docs);
+  res.json({ ok: true });
+}));
+
+router.post('/sessions/:id/cv', requireAuth, loadOwnedSession, asyncHandler(async (req, res) => {
     const { fileName, text, fileBase64, contentType } = req.body ?? {};
     if (typeof fileName !== 'string' || !fileName.trim()) {
       return res.status(400).json({ error: 'invalid_input', detail: 'A CV filename is required.' });
@@ -320,15 +324,33 @@ router.post('/sessions/:id/responses', requireAuth, loadOwnedSession, asyncHandl
     const keywords = [...new Set((cleanText.match(/[A-Za-z][A-Za-z+#.-]{2,}/g) ?? []).map((word) => word.toLowerCase()))]
       .filter((word) => !['and', 'the', 'with', 'for', 'from', 'this', 'that', 'using'].includes(word))
       .slice(0, 20);
+    const skills = keywords.filter((word) => /^(javascript|typescript|react|node|python|java|c\+\+|sql|mongodb|postgres|aws|docker|kubernetes|tensorflow|pytorch|machine|learning|api|git)$/.test(word));
+    const focus = skills.length ? skills.slice(0, 5) : keywords.slice(0, 5);
+    const generatedQuestionDocs = focus.map((skill) => ({
+      _id: new ObjectId(),
+      companyId: req.session.companyId,
+      sessionId: req.session._id,
+      round: 'technical_interview',
+      qtype: 'behavioral',
+      category: 'CV-based technical interview',
+      subtopic: skill,
+      prompt: `You listed ${skill} on your CV. Explain one project where you used ${skill}, the technical decisions you made, and how you measured the result.`,
+      options: null,
+      correctAnswer: `A project using ${skill} with clear technical decisions and measurable results.`,
+      points: 10,
+    }));
+    await req.db.collection('questionBank').deleteMany({ sessionId: req.session._id });
+    await req.db.collection('questionBank').insertMany(generatedQuestionDocs);
+    const generatedQuestions = generatedQuestionDocs.map(({ _id, companyId, sessionId, ...question }) => ({
+      ...question,
+      id: String(_id),
+    }));
     await req.db.collection('candidateCvs').updateOne(
       { sessionId: req.session._id },
       { $set: { sessionId: req.session._id, userId: req.session.userId, fileName: fileName.trim(), text: cleanText, keywords, updatedAt: new Date() } },
       { upsert: true },
     );
-    res.json({ ok: true, keywords });
-  }));
-  await req.db.collection('examResponses').insertMany(docs);
-  res.json({ ok: true });
+  res.json({ ok: true, keywords, questions: generatedQuestions });
 }));
 
 // Mirrors the (superseded) Supabase plan's record_round_score RPC.
