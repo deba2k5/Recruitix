@@ -11,5 +11,13 @@ export default async function handler(req, res) {
   }
 
   const app = await getApp();
-  return app(req, res);
+  await new Promise((resolve, reject) => {
+    res.once('finish', resolve);
+    res.once('close', resolve);
+    try {
+      app(req, res);
+    } catch (error) {
+      reject(error);
+    }
+  });
 }
