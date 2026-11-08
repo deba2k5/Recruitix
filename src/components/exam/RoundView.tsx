@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ChevronLeft, ChevronRight, Clock } from 'lucide-react';
 import type { QuestionBankRow } from '@/lib/examRounds';
 import { scoreAnswer } from '@/lib/examRounds';
+import QuestionNavigator from './QuestionNavigator';
 
 interface RoundViewProps {
   title: string;
@@ -61,7 +62,7 @@ const RoundView = ({ title, durationMin, questions, onSubmit }: RoundViewProps) 
 
   return (
     <div className="min-h-screen bg-black p-4">
-      <div className="max-w-3xl mx-auto py-8 space-y-6">
+      <div className="max-w-6xl mx-auto py-8 space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-white">{title}</h1>
           <Badge className="bg-slate-800 text-white flex items-center gap-1">
@@ -74,6 +75,8 @@ const RoundView = ({ title, durationMin, questions, onSubmit }: RoundViewProps) 
           Question {currentIndex + 1} of {questions.length} {question.category ? `· ${question.category}` : ''}
         </p>
 
+        <div className="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
+        <QuestionNavigator questions={questions} currentIndex={currentIndex} answers={answers} onSelect={setCurrentIndex} />
         <Card className="bg-slate-900 border-slate-700">
           <CardHeader>
             <CardTitle className="text-white text-lg">{question.prompt}</CardTitle>
@@ -101,6 +104,7 @@ const RoundView = ({ title, durationMin, questions, onSubmit }: RoundViewProps) 
             )}
           </CardContent>
         </Card>
+        </div>
 
         <div className="flex justify-between">
           <Button

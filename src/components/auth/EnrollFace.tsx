@@ -103,7 +103,7 @@ const EnrollFace = ({ onEnrolled }: EnrollFaceProps) => {
             <div>
               <CardTitle className="text-2xl text-white">Face Enrollment Required</CardTitle>
               <CardDescription className="text-slate-300">
-                Every exam requires a verified face template. This only takes a few seconds.
+                Your face is used to authenticate you before the exam. This only takes a few seconds.
               </CardDescription>
             </div>
             {status === 'complete' && <Badge className="bg-green-600 text-white">COMPLETE</Badge>}
@@ -148,7 +148,7 @@ const EnrollFace = ({ onEnrolled }: EnrollFaceProps) => {
           {status === 'complete' ? (
             <div className="text-center space-y-3 py-4">
               <CheckCircle className="w-16 h-16 text-green-400 mx-auto" />
-              <p className="text-white text-lg font-semibold">Enrollment complete — redirecting...</p>
+              <p className="text-white text-lg font-semibold">Face enrolled — opening your exam portal...</p>
             </div>
           ) : (
             <Button

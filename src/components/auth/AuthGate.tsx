@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Mail, Lock, User as UserIcon, Calendar } from 'lucide-react';
+import { Mail, Lock, User as UserIcon, GraduationCap, Building2, IdCard } from 'lucide-react';
 import { apiPost, setToken } from '@/lib/api';
 
 interface AuthGateProps {
@@ -9,17 +9,25 @@ interface AuthGateProps {
   onAuthenticated: () => Promise<void> | void;
 }
 
-/** Plain email/password signup + sign-in against the Express API. Face verification happens later, at the exam gate. */
+/** Account access against the Express API. Camera access is requested only for exam proctoring. */
 const AuthGate = ({ onBack, onAuthenticated }: AuthGateProps) => {
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [dob, setDob] = useState('');
+  const [year, setYear] = useState('');
+  const [department, setDepartment] = useState('');
+  const [enrollmentNo, setEnrollmentNo] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const isSignupValid = name.trim() && email.trim() && dob && password.length >= 6;
+  const isSignupValid =
+    name.trim() &&
+    email.trim() &&
+    year.trim() &&
+    department.trim() &&
+    enrollmentNo.trim() &&
+    password.length >= 6;
   const isSigninValid = email.trim() && password.length > 0;
 
   const handleSubmit = async () => {
@@ -27,7 +35,10 @@ const AuthGate = ({ onBack, onAuthenticated }: AuthGateProps) => {
     setIsLoading(true);
     try {
       const path = mode === 'signup' ? '/api/auth/signup' : '/api/auth/login';
-      const body = mode === 'signup' ? { name, email, dateOfBirth: dob, password } : { email, password };
+      const body =
+        mode === 'signup'
+          ? { name, email, year, department, enrollmentNo, password }
+          : { email, password };
       const { token } = await apiPost<{ token: string }>(path, body);
       setToken(token);
       await onAuthenticated();
@@ -45,7 +56,9 @@ const AuthGate = ({ onBack, onAuthenticated }: AuthGateProps) => {
           <CardHeader className="space-y-3 text-center">
             <CardTitle className="text-2xl text-white">Recruitix Account</CardTitle>
             <CardDescription className="text-slate-300">
-              {mode === 'signup' ? 'Create your candidate account' : 'Sign in to continue'}
+              {mode === 'signup'
+                ? 'Create your candidate account'
+                : 'Sign in to continue to your exam portal'}
             </CardDescription>
           </CardHeader>
 
@@ -89,18 +102,49 @@ const AuthGate = ({ onBack, onAuthenticated }: AuthGateProps) => {
 
               {mode === 'signup' && (
                 <div>
-                  <label className="text-white text-sm font-medium mb-2 block">Date of Birth</label>
+                  <label className="text-white text-sm font-medium mb-2 block">Year of Study</label>
                   <div className="relative">
-                    <Calendar className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
+                    <GraduationCap className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
                     <input
-                      type="date"
-                      value={dob}
-                      onChange={(e) => setDob(e.target.value)}
-                      max={new Date().toISOString().split('T')[0]}
+                      type="text"
+                      placeholder="e.g. 3rd Year"
+                      value={year}
+                      onChange={(e) => setYear(e.target.value)}
                       className="w-full bg-slate-800 border border-slate-600 rounded-lg pl-10 pr-4 py-2 text-white placeholder-slate-400 focus:outline-none focus:border-blue-500"
                     />
                   </div>
                 </div>
+              )}
+
+              {mode === 'signup' && (
+                <>
+                  <div>
+                    <label className="text-white text-sm font-medium mb-2 block">Department</label>
+                    <div className="relative">
+                      <Building2 className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
+                      <input
+                        type="text"
+                        placeholder="e.g. Computer Science"
+                        value={department}
+                        onChange={(e) => setDepartment(e.target.value)}
+                        className="w-full bg-slate-800 border border-slate-600 rounded-lg pl-10 pr-4 py-2 text-white placeholder-slate-400 focus:outline-none focus:border-blue-500"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-white text-sm font-medium mb-2 block">Enrollment Number</label>
+                    <div className="relative">
+                      <IdCard className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
+                      <input
+                        type="text"
+                        placeholder="Your enrollment number"
+                        value={enrollmentNo}
+                        onChange={(e) => setEnrollmentNo(e.target.value)}
+                        className="w-full bg-slate-800 border border-slate-600 rounded-lg pl-10 pr-4 py-2 text-white placeholder-slate-400 focus:outline-none focus:border-blue-500"
+                      />
+                    </div>
+                  </div>
+                </>
               )}
 
               <div>
@@ -122,7 +166,7 @@ const AuthGate = ({ onBack, onAuthenticated }: AuthGateProps) => {
                 disabled={isLoading || (mode === 'signup' ? !isSignupValid : !isSigninValid)}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg"
               >
-                {isLoading ? 'Please wait...' : mode === 'signup' ? 'Sign Up' : 'Sign In'}
+                {isLoading ? 'Please wait...' : mode === 'signup' ? 'Create Account' : 'Sign In'}
               </Button>
 
               <button

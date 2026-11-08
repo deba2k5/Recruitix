@@ -9,7 +9,7 @@ import examRoutes from './routes/exam.js';
 const app = express();
 
 app.use(cors());
-app.use(express.json({ limit: '5mb' })); // snapshots are base64 JPEGs in the JSON body
+app.use(express.json({ limit: '30mb' })); // snapshots and short speaking recordings are base64 payloads
 
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
 

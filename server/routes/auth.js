@@ -15,24 +15,43 @@ function issueToken(user) {
 }
 
 router.post('/signup', asyncHandler(async (req, res) => {
-  const { name, email, dateOfBirth, password } = req.body ?? {};
-  if (!name || !email || !dateOfBirth || !password || password.length < 6) {
-    return res.status(400).json({ error: 'invalid_input', detail: 'name, email, dateOfBirth, and a password of 6+ characters are required.' });
+  const { name, email, year, department, enrollmentNo, password } = req.body ?? {};
+  if (
+    typeof name !== 'string' ||
+    typeof email !== 'string' ||
+    typeof year !== 'string' ||
+    typeof department !== 'string' ||
+    typeof enrollmentNo !== 'string' ||
+    typeof password !== 'string' ||
+    !name.trim() ||
+    !email.trim() ||
+    !year.trim() ||
+    !department.trim() ||
+    !enrollmentNo.trim() ||
+    password.length < 6
+  ) {
+    return res.status(400).json({
+      error: 'invalid_input',
+      detail: 'name, email, year, department, enrollmentNo, and a password of 6+ characters are required.',
+    });
   }
 
   const db = await getDb();
   const users = db.collection('users');
 
-  const existing = await users.findOne({ email: email.toLowerCase() });
+  const normalizedEmail = email.trim().toLowerCase();
+  const existing = await users.findOne({ email: normalizedEmail });
   if (existing) return res.status(409).json({ error: 'email_taken' });
 
   const passwordHash = await bcrypt.hash(password, 10);
   const now = new Date();
   const doc = {
-    email: email.toLowerCase(),
+    email: normalizedEmail,
     passwordHash,
     displayName: name,
-    dateOfBirth,
+    year: String(year).trim(),
+    department: String(department).trim(),
+    enrollmentNo: String(enrollmentNo).trim(),
     role: 'candidate',
     faceEnrolled: false,
     enrollmentStatus: 'pending',
@@ -47,10 +66,12 @@ router.post('/signup', asyncHandler(async (req, res) => {
 
 router.post('/login', asyncHandler(async (req, res) => {
   const { email, password } = req.body ?? {};
-  if (!email || !password) return res.status(400).json({ error: 'invalid_input' });
+  if (typeof email !== 'string' || typeof password !== 'string' || !email.trim() || !password) {
+    return res.status(400).json({ error: 'invalid_input' });
+  }
 
   const db = await getDb();
-  const user = await db.collection('users').findOne({ email: email.toLowerCase() });
+  const user = await db.collection('users').findOne({ email: email.trim().toLowerCase() });
   if (!user) return res.status(401).json({ error: 'invalid_credentials' });
 
   const ok = await bcrypt.compare(password, user.passwordHash);

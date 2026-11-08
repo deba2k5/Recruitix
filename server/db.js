@@ -26,3 +26,8 @@ export async function getSnapshotBucket() {
   const db = await getDb();
   return new GridFSBucket(db, { bucketName: 'snapshots' });
 }
+
+export async function getRecordingBucket() {
+  const db = await getDb();
+  return new GridFSBucket(db, { bucketName: 'recordings' });
+}

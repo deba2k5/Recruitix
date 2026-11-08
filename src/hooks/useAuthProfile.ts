@@ -5,7 +5,9 @@ export interface Profile {
   id: string;
   email: string;
   displayName: string | null;
-  dateOfBirth: string | null;
+  year: string | null;
+  department: string | null;
+  enrollmentNo: string | null;
   role: 'candidate' | 'recruiter';
   faceEnrolled: boolean;
   enrollmentStatus: 'pending' | 'in_progress' | 'completed';

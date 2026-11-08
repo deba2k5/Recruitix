@@ -1,17 +1,33 @@
 import { apiGet, apiPost } from './api';
 import { calculateSemanticSimilarity } from '@/utils/semanticSimilarity';
 
-export type RoundName = 'technical' | 'personal' | 'hr';
+export type RoundName = 'english' | 'aptitude' | 'ai_technical' | 'coding1' | 'coding2' | 'technical_interview' | 'technical' | 'personal' | 'hr';
 
 export interface QuestionBankRow {
   id: string;
   round: RoundName;
   qtype: 'mcq' | 'coding' | 'behavioral';
   category: string | null;
+  subtopic?: string | null;
   prompt: string;
   options: string[] | null;
   correctAnswer: string | null;
   points: number;
+  passage?: string | null;
+  audioText?: string | null;
+  audioUrl?: string | null;
+  description?: string | null;
+  inputFormat?: string | null;
+  outputFormat?: string | null;
+  constraints?: string[];
+  examples?: Array<{ input: string; output: string; explanation?: string }>;
+  visibleTestCases?: number;
+  hiddenTestCases?: number;
+  supportedLanguages?: string[];
+  starterCode?: Record<string, string> | null;
+  mode?: 'ai_assisted' | 'debugging' | string | null;
+  caseStudy?: string | null;
+  assistanceTokenLimit?: number | null;
 }
 
 export async function fetchRoundQuestions(companyId: string, round: RoundName): Promise<QuestionBankRow[]> {

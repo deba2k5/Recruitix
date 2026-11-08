@@ -1,4 +1,3 @@
-
 # Recruitix Live Integrity System
 
 ## A Parameterized and Deterministic Framework for Robust AI-Driven Assessment and Integrity Validation
@@ -95,6 +94,38 @@ npm run dev
 ```
 
 Now open `http://localhost:5173` to view Recruitix in your browser.
+
+### English Communication Round
+
+The first assessment section is the English Communication Round:
+
+- Two listening comprehensions with five questions per passage.
+- Two reading comprehensions with five MCQs per passage.
+- Two 60-second speaking prompts recorded from the candidate's camera and microphone.
+- Twenty grammar and sentence-correction MCQs.
+
+Speaking recordings are stored in MongoDB GridFS for review. The browser uses
+MP4 when the selected browser supports MP4 `MediaRecorder`; otherwise it stores
+the browser's supported WebM recording. Listening items accept an MP3 URL through
+the question bank and use the provided passage audio; the local fallback uses
+the browser's speech engine when no audio URL is configured.
+
+### MongoDB and Vercel deployment
+
+The candidate authentication, face enrollment, and exam session APIs use MongoDB
+Atlas. In the Vercel project settings, add these environment variables for the
+Production, Preview, and Development environments:
+
+```text
+MONGODB_URI=mongodb+srv://o24debangshu_db_user:<url_encoded_password>@portfolio1.xixjqhr.mongodb.net/recruitix?retryWrites=true&w=majority
+JWT_SECRET=<a_long_random_secret>
+VITE_API_BASE_URL=
+```
+
+Replace `<url_encoded_password>` with the Atlas database user's password. If the
+password contains characters such as `@`, `:`, `/`, or `#`, URL-encode it first.
+Do not commit the completed URI or `JWT_SECRET` to the repository. After saving
+the variables, redeploy the Vercel project and verify `/api/health`.
 
 -----
 

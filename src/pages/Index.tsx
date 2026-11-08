@@ -8,7 +8,6 @@ import { FeatureDotCard } from '@/components/ui/feature-dot-card';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import RecruiterPortal from '@/components/RecruiterPortal';
 import AuthGate from '@/components/auth/AuthGate';
-import EnrollFace from '@/components/auth/EnrollFace';
 import CandidateFlow from '@/components/exam/CandidateFlow';
 import { HeroScrollDemo } from '@/components/HeroScrollDemo';
 import { TimelineDemo } from '@/components/TimelineDemo';
@@ -73,9 +72,8 @@ const Index = () => {
     setUserType(null);
   };
 
-  // Mandatory face-enrollment gate: a signed-in candidate cannot reach any other screen
-  // until faceEnrolled is true — no skip path. getToken() (synchronous) gates on whether a
-  // JWT exists at all; authLoading covers the async /auth/me round-trip that resolves it.
+  // Candidate access is authenticated with the account credentials. Facial verification
+  // is intentionally not required; camera-based exam proctoring starts inside the exam.
   if (getToken()) {
     if (authLoading) {
       return (
@@ -83,9 +81,6 @@ const Index = () => {
           <p className="text-white">Loading your profile...</p>
         </div>
       );
-    }
-    if (candidateProfile && !candidateProfile.faceEnrolled) {
-      return <EnrollFace onEnrolled={refreshProfile} />;
     }
     if (candidateProfile) {
       return <CandidateFlow onBack={handleCandidateLogout} />;

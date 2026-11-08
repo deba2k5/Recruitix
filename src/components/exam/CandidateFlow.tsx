@@ -1,18 +1,16 @@
 import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { UserCheck } from 'lucide-react';
 import CompanySelect from './CompanySelect';
-import ExamFaceGate from './ExamFaceGate';
 import ExamRunner from './ExamRunner';
+import ExamReportsPage from './ExamReportsPage';
+import ExamReport from './ExamReport';
 
 interface CandidateFlowProps {
   onBack: () => void;
 }
 
-type Step = 'select_company' | 'face_gate' | 'manual_review' | 'exam';
+type Step = 'select_company' | 'exam' | 'reports' | 'report';
 
-/** Orchestrates company selection -> face+liveness gate -> continuously-proctored exam. */
+/** Orchestrates company selection -> continuously-proctored exam. */
 const CandidateFlow = ({ onBack }: CandidateFlowProps) => {
   const [step, setStep] = useState<Step>('select_company');
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -21,49 +19,38 @@ const CandidateFlow = ({ onBack }: CandidateFlowProps) => {
     return (
       <CompanySelect
         onBack={onBack}
+        onReports={() => setStep('reports')}
         onSessionReady={(id) => {
           setSessionId(id);
-          setStep('face_gate');
+          setStep('exam');
         }}
       />
     );
   }
 
-  if (step === 'face_gate' && sessionId) {
+  if (step === 'exam' && sessionId) {
+    return <ExamRunner sessionId={sessionId} onExamComplete={() => setStep('reports')} />;
+  }
+
+  if (step === 'reports') {
     return (
-      <ExamFaceGate
-        sessionId={sessionId}
-        onUnlocked={() => setStep('exam')}
-        onManualReview={() => setStep('manual_review')}
-        onCancel={() => setStep('select_company')}
+      <ExamReportsPage
+        onSelectReport={(id) => {
+          setSessionId(id);
+          setStep('report');
+        }}
+        onBack={() => setStep('select_company')}
+        onLogout={onBack}
       />
     );
   }
 
-  if (step === 'manual_review') {
+  if (step === 'report' && sessionId) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center p-4">
-        <Card className="w-full max-w-md bg-slate-900 border-slate-700">
-          <CardHeader className="text-center space-y-2">
-            <UserCheck className="w-12 h-12 text-amber-400 mx-auto" />
-            <CardTitle className="text-white">Manual Review Required</CardTitle>
-            <CardDescription className="text-slate-300">
-              We couldn't verify you automatically after several attempts. An admin will review
-              your enrollment and unlock your exam shortly.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button onClick={() => setStep('select_company')} variant="outline" className="w-full bg-transparent border-slate-600 text-slate-300 hover:bg-slate-800">
-              Back
-            </Button>
-          </CardContent>
-        </Card>
+        <ExamReport sessionId={sessionId} onContinue={() => setStep('reports')} />
       </div>
     );
-  }
-
-  if (step === 'exam' && sessionId) {
-    return <ExamRunner sessionId={sessionId} onExamComplete={onBack} />;
   }
 
   return null;
