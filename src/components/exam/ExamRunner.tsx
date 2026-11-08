@@ -255,7 +255,7 @@ const ExamRunner = ({ sessionId, onExamComplete }: ExamRunnerProps) => {
 
   if (ended) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center p-4">
+      <div className="hirex-app-shell min-h-screen flex items-center justify-center p-4">
         <ExamReport sessionId={sessionId} onContinue={onExamComplete} />
       </div>
     );
@@ -263,7 +263,7 @@ const ExamRunner = ({ sessionId, onExamComplete }: ExamRunnerProps) => {
 
   if (initError) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center p-4">
+      <div className="hirex-app-shell min-h-screen flex items-center justify-center p-4">
         <Card className="w-full max-w-lg bg-slate-900 border-red-500/50">
           <CardHeader>
             <CardTitle className="text-white">Communication Round could not open</CardTitle>
@@ -279,7 +279,7 @@ const ExamRunner = ({ sessionId, onExamComplete }: ExamRunnerProps) => {
 
   if (!secureExamStarted) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center p-4">
+      <div className="hirex-app-shell min-h-screen flex items-center justify-center p-4">
         <Card className="w-full max-w-lg bg-slate-900 border-slate-700">
           <CardHeader><CardTitle className="text-white">Proctored Exam</CardTitle><CardDescription className="text-slate-300">Camera and screen sharing are required for proctoring. You can exit the exam at any time.</CardDescription></CardHeader>
           <CardContent className="space-y-4">
@@ -319,7 +319,7 @@ const ExamRunner = ({ sessionId, onExamComplete }: ExamRunnerProps) => {
         : durations.hrDurationMin;
 
   return (
-    <div className="relative">
+    <div className="hirex-app-shell relative min-h-screen">
       <video ref={videoRef} autoPlay muted playsInline className="fixed bottom-4 right-4 w-40 h-32 object-cover rounded-lg border border-slate-700 z-50" />
       <Button onClick={() => { stopEverything(); onExamComplete(); }} className="fixed bottom-4 left-4 z-50 bg-red-700 hover:bg-red-800 text-white">Exit exam</Button>
 

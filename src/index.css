@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -67,6 +69,43 @@
     background-repeat: no-repeat;
     background-size: cover;
     background-attachment: fixed;
+  }
+
+  .hirex-app-shell {
+    min-height: 100vh;
+    background:
+      linear-gradient(rgba(0,0,0,.72), rgba(0,0,0,.88)),
+      url('/hirex-gradient.jpg') center / cover fixed;
+  }
+
+  .hirex-card {
+    border-color: rgba(255,255,255,.16) !important;
+    border-radius: 1.25rem !important;
+    background: rgba(255,255,255,.07) !important;
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 18px 50px rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.08);
+  }
+
+  .hirex-action {
+    min-height: 3rem;
+    border-radius: .9rem !important;
+    box-shadow: 0 6px 0 rgba(0,0,0,.25), 0 12px 24px rgba(0,0,0,.2);
+    transition: transform 180ms ease, box-shadow 180ms ease;
+  }
+
+  .hirex-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 0 rgba(0,0,0,.22), 0 16px 28px rgba(0,0,0,.28);
+  }
+
+  .hirex-report .rounded-lg,
+  .hirex-report .rounded-md {
+    border-radius: .9rem;
+  }
+
+  @media (max-width: 640px) {
+    .hirex-app-shell { background-attachment: scroll; }
   }
 
   .hirex-footer {
@@ -196,8 +235,18 @@
     @apply border-border;
   }
 
+  html,
+  body,
+  button,
+  input,
+  textarea,
+  select {
+    font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  }
+
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "cv11", "ss01";
   }
 }
 

@@ -30,7 +30,7 @@ const CompanySelect = ({ onSessionReady, onBack, onReports }: CompanySelectProps
   };
 
   return (
-    <div className="min-h-screen bg-black p-4">
+    <div className="hirex-app-shell min-h-screen p-4">
       <div className="max-w-4xl mx-auto py-12">
         <h1 className="text-3xl font-bold text-white mb-2">Assessment Sections</h1>
         <p className="text-slate-400 mb-8">Choose a section to begin. Each section has its own questions and timer.</p>
@@ -42,7 +42,7 @@ const CompanySelect = ({ onSessionReady, onBack, onReports }: CompanySelectProps
         )}
 
         <div className="grid gap-4 md:grid-cols-2">
-          <Card className="bg-slate-900 border-slate-700">
+          <Card className="hirex-card bg-slate-900 border-slate-700">
             <CardHeader className="flex flex-row items-center gap-3">
               <MessageSquareText className="w-8 h-8 text-blue-400" />
               <div>
@@ -52,23 +52,23 @@ const CompanySelect = ({ onSessionReady, onBack, onReports }: CompanySelectProps
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center gap-2 text-sm text-slate-300"><ShieldCheck className="w-4 h-4 text-green-400" /> Only camera and screen sharing are required for proctoring.</div>
-              <Button onClick={() => startRound('english')} disabled={starting !== null} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+              <Button onClick={() => startRound('english')} disabled={starting !== null} className="hirex-action w-full bg-blue-600 hover:bg-blue-700 text-white">
                 {starting === 'english' ? 'Starting...' : 'Start English Communication'}
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </CardContent>
           </Card>
-          <Card className="bg-slate-900 border-slate-700">
+          <Card className="hirex-card bg-slate-900 border-slate-700">
             <CardHeader className="flex flex-row items-center gap-3">
               <Mic2 className="w-8 h-8 text-emerald-400" />
               <div><CardTitle className="text-white">Technical Interview</CardTitle><CardDescription className="text-slate-400">Voice-assisted, CV-based technical interview with recorded answers</CardDescription></div>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center gap-2 text-sm text-slate-300"><ShieldCheck className="w-4 h-4 text-green-400" /> Upload a readable CV, listen to questions and answer by voice.</div>
-              <Button onClick={() => startRound('technical_interview')} disabled={starting !== null} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white">{starting === 'technical_interview' ? 'Starting...' : 'Start Technical Interview'}<ArrowRight className="w-4 h-4 ml-2" /></Button>
+              <Button onClick={() => startRound('technical_interview')} disabled={starting !== null} className="hirex-action w-full bg-emerald-600 hover:bg-emerald-700 text-white">{starting === 'technical_interview' ? 'Starting...' : 'Start Technical Interview'}<ArrowRight className="w-4 h-4 ml-2" /></Button>
             </CardContent>
           </Card>
-          <Card className="bg-slate-900 border-slate-700">
+          <Card className="hirex-card bg-slate-900 border-slate-700">
             <CardHeader className="flex flex-row items-center gap-3">
               <Code2 className="w-8 h-8 text-fuchsia-400" />
               <div>
@@ -78,13 +78,13 @@ const CompanySelect = ({ onSessionReady, onBack, onReports }: CompanySelectProps
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center gap-2 text-sm text-slate-300"><ShieldCheck className="w-4 h-4 text-green-400" /> DSA case study plus one debugging task in Python, C, C++ or Java.</div>
-              <Button onClick={() => startRound('coding2')} disabled={starting !== null} className="w-full bg-fuchsia-600 hover:bg-fuchsia-700 text-white">
+              <Button onClick={() => startRound('coding2')} disabled={starting !== null} className="hirex-action w-full bg-fuchsia-600 hover:bg-fuchsia-700 text-white">
                 {starting === 'coding2' ? 'Starting...' : 'Start Coding 2'}
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </CardContent>
           </Card>
-          <Card className="bg-slate-900 border-slate-700">
+          <Card className="hirex-card bg-slate-900 border-slate-700">
             <CardHeader className="flex flex-row items-center gap-3">
               <Code2 className="w-8 h-8 text-cyan-400" />
               <div>
@@ -94,13 +94,13 @@ const CompanySelect = ({ onSessionReady, onBack, onReports }: CompanySelectProps
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center gap-2 text-sm text-slate-300"><ShieldCheck className="w-4 h-4 text-green-400" /> Choose C, C++, Java or Python for each solution.</div>
-              <Button onClick={() => startRound('coding1')} disabled={starting !== null} className="w-full bg-cyan-600 hover:bg-cyan-700 text-white">
+              <Button onClick={() => startRound('coding1')} disabled={starting !== null} className="hirex-action w-full bg-cyan-600 hover:bg-cyan-700 text-white">
                 {starting === 'coding1' ? 'Starting...' : 'Start Coding 1'}
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </CardContent>
           </Card>
-          <Card className="bg-slate-900 border-slate-700">
+          <Card className="hirex-card bg-slate-900 border-slate-700">
             <CardHeader className="flex flex-row items-center gap-3">
               <BrainCircuit className="w-8 h-8 text-purple-400" />
               <div>
@@ -110,13 +110,13 @@ const CompanySelect = ({ onSessionReady, onBack, onReports }: CompanySelectProps
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center gap-2 text-sm text-slate-300"><ShieldCheck className="w-4 h-4 text-green-400" /> 20 AI Literacy and 20 Technical Knowledge questions.</div>
-              <Button onClick={() => startRound('ai_technical')} disabled={starting !== null} className="w-full bg-purple-600 hover:bg-purple-700 text-white">
+              <Button onClick={() => startRound('ai_technical')} disabled={starting !== null} className="hirex-action w-full bg-purple-600 hover:bg-purple-700 text-white">
                 {starting === 'ai_technical' ? 'Starting...' : 'Start AI and Technical Section'}
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </CardContent>
           </Card>
-          <Card className="bg-slate-900 border-slate-700">
+          <Card className="hirex-card bg-slate-900 border-slate-700">
             <CardHeader className="flex flex-row items-center gap-3">
               <Calculator className="w-8 h-8 text-amber-400" />
               <div>
@@ -126,7 +126,7 @@ const CompanySelect = ({ onSessionReady, onBack, onReports }: CompanySelectProps
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center gap-2 text-sm text-slate-300"><ShieldCheck className="w-4 h-4 text-green-400" /> Camera and screen sharing are required for proctoring.</div>
-              <Button onClick={() => startRound('aptitude')} disabled={starting !== null} className="w-full bg-amber-600 hover:bg-amber-700 text-white">
+              <Button onClick={() => startRound('aptitude')} disabled={starting !== null} className="hirex-action w-full bg-amber-600 hover:bg-amber-700 text-white">
                 {starting === 'aptitude' ? 'Starting...' : 'Start Hard Aptitude'}
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>

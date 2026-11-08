@@ -42,7 +42,7 @@ const ExamReport = ({ sessionId, onContinue }: { sessionId: string; onContinue: 
   const reviewCount = report.questions.filter((question) => question.result === 'review').length;
 
   return (
-    <div className="report-print-area w-full max-w-6xl">
+    <div className="report-print-area hirex-report w-full max-w-6xl">
       <style>{`@media print { body { background: white !important; } .report-no-print { display: none !important; } .report-print-area { max-width: none !important; color: #111827 !important; } .report-print-area * { color: #111827 !important; border-color: #d1d5db !important; background: white !important; } .report-break { break-inside: avoid; } }`}</style>
       <div className="flex items-center justify-between mb-5 report-no-print">
         <div><h1 className="text-2xl font-bold text-white">Detailed exam report</h1><p className="text-slate-400">Performance, question analysis, topic coverage and proctoring review.</p></div>

@@ -46,7 +46,7 @@ const ExamReportsPage = ({ onSelectReport, onBack, onLogout }: ExamReportsPagePr
   }, []);
 
   return (
-    <div className="min-h-screen bg-black p-4">
+    <div className="hirex-app-shell min-h-screen p-4">
       <div className="max-w-4xl mx-auto py-12 space-y-6">
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -63,7 +63,7 @@ const ExamReportsPage = ({ onSelectReport, onBack, onLogout }: ExamReportsPagePr
         )}
         <div className="grid gap-4">
           {reports.map((report) => (
-            <Card key={report.sessionId} className="bg-slate-900 border-slate-700">
+            <Card key={report.sessionId} className="hirex-card bg-slate-900 border-slate-700">
               <CardHeader className="flex flex-row items-center justify-between gap-4">
                 <div className="flex items-start gap-3">
                   <BarChart3 className="w-7 h-7 text-blue-400 mt-1" />
@@ -82,7 +82,7 @@ const ExamReportsPage = ({ onSelectReport, onBack, onLogout }: ExamReportsPagePr
                 <div className="text-sm text-slate-300">
                   {report.percentage === null ? 'Score pending' : <><strong className="text-white">{report.percentage}%</strong>{report.score !== null ? ` · Score ${report.score}` : ''}</>}
                 </div>
-                <Button onClick={() => onSelectReport(report.sessionId)} className="bg-blue-600 hover:bg-blue-700 text-white"><FileText className="w-4 h-4 mr-2" />View report</Button>
+                <Button onClick={() => onSelectReport(report.sessionId)} className="hirex-action bg-blue-600 hover:bg-blue-700 text-white"><FileText className="w-4 h-4 mr-2" />View report</Button>
               </CardContent>
             </Card>
           ))}

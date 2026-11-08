@@ -1,5 +1,5 @@
 const TOKEN_KEY = 'recruitix_token';
-const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? 'http://localhost:8787' : '');
 
 export function getToken(): string | null {
   return localStorage.getItem(TOKEN_KEY);
@@ -23,7 +23,7 @@ export class ApiError extends Error {
   }
 }
 
-async function request<T>(method: 'GET' | 'POST', path: string, body?: unknown): Promise<T> {
+async function request<T>(method: 'GET' | 'POST' | 'DELETE', path: string, body?: unknown): Promise<T> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   const token = getToken();
   if (token) headers.Authorization = `Bearer ${token}`;
@@ -50,4 +50,8 @@ export function apiGet<T>(path: string): Promise<T> {
 
 export function apiPost<T>(path: string, body?: unknown): Promise<T> {
   return request<T>('POST', path, body);
+}
+
+export function apiDelete<T>(path: string): Promise<T> {
+  return request<T>('DELETE', path);
 }

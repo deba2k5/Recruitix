@@ -63,7 +63,9 @@ const Index = () => {
       // Track admin login
       trackUserLogin('recruiter-admin', adminCredentials.id, 'Hirex Administrator', 'recruiter');
     } catch (error: any) {
-      const errorMessage = error instanceof Error ? error.message : 'Invalid credentials. Please try again.';
+      const errorMessage = error instanceof Error && error.message !== 'Failed to fetch'
+        ? error.message
+        : 'Admin API is unavailable. Start the Hirex backend on port 8787 and try again.';
       setLoginError(errorMessage);
     } finally {
       setIsLoading(false);
