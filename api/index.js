@@ -10,14 +10,15 @@ export default async function handler(req, res) {
     return res.status(200).json({ ok: true });
   }
 
-  const app = await getApp();
-  await new Promise((resolve, reject) => {
-    res.once('finish', resolve);
-    res.once('close', resolve);
-    try {
+  try {
+    const app = await getApp();
+    await new Promise((resolve, reject) => {
+      res.once('finish', resolve);
+      res.once('close', resolve);
       app(req, res);
-    } catch (error) {
-      reject(error);
-    }
-  });
+    });
+  } catch (error) {
+    console.error('Vercel API invocation failed', error);
+    if (!res.headersSent) res.status(500).json({ error: 'api_boot_failed' });
+  }
 }
