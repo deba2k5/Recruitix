@@ -80,6 +80,22 @@ router.post('/login', asyncHandler(async (req, res) => {
   res.json({ token: issueToken(user), user: toUserDto(user) });
 }));
 
+router.post('/recruiter-login', asyncHandler(async (req, res) => {
+  const { id, password } = req.body ?? {};
+  const configuredId = process.env.ADMIN_EMAIL || 'admin@gmail.com';
+  const configuredPassword = process.env.ADMIN_PASSWORD || 'admin123';
+  if (typeof id !== 'string' || typeof password !== 'string' || id !== configuredId || password !== configuredPassword) {
+    return res.status(401).json({ error: 'invalid_credentials' });
+  }
+  const recruiter = {
+    _id: new ObjectId('000000000000000000000001'),
+    email: configuredId,
+    displayName: 'Hirex Administrator',
+    role: 'recruiter',
+  };
+  res.json({ token: issueToken(recruiter), user: toUserDto(recruiter) });
+}));
+
 router.get('/me', requireAuth, asyncHandler(async (req, res) => {
   const db = await getDb();
   const user = await db.collection('users').findOne({ _id: new ObjectId(req.userId) });

@@ -4,7 +4,7 @@ import { motion } from "motion/react";
 
 const testimonials = [
   {
-    text: "Recruitix transformed our hiring process completely. The AI-powered assessments helped us identify top talent 3x faster than traditional methods.",
+    text: "Hirex transformed our hiring process completely. The AI-powered assessments helped us identify top talent 3x faster than traditional methods.",
     image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
     name: "Sarah Johnson",
     role: "HR Director at TechCorp",
@@ -46,7 +46,7 @@ const testimonials = [
     role: "Recruitment Specialist",
   },
   {
-    text: "Recruitix's AI algorithms are incredibly accurate. The platform correctly identified our top performers during the assessment phase.",
+    text: "Hirex's AI algorithms are incredibly accurate. The platform correctly identified our top performers during the assessment phase.",
     image: "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
     name: "Alex Turner",
     role: "Engineering Manager",

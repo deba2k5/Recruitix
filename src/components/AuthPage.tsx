@@ -26,7 +26,7 @@ const AuthPage = ({ onBack, onAuthSuccess }: AuthPageProps) => {
       // Simulate authentication
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      if (authEmail === 'demo@recruitix.com' && authPassword === 'demo123') {
+      if (authEmail === 'demo@hirex.ai' && authPassword === 'demo123') {
         const user = {
           email: authEmail,
           displayName: credentials.name || 'Demo User',
@@ -34,7 +34,7 @@ const AuthPage = ({ onBack, onAuthSuccess }: AuthPageProps) => {
         };
         onAuthSuccess?.(user);
       } else {
-        setAuthError('Invalid credentials. Try demo@recruitix.com / demo123');
+        setAuthError('Invalid credentials. Try demo@hirex.ai / demo123');
       }
     } catch (error) {
       setAuthError('Authentication failed. Please try again.');
@@ -98,7 +98,7 @@ const AuthPage = ({ onBack, onAuthSuccess }: AuthPageProps) => {
           <Card className="bg-white/10 backdrop-blur-sm border-white/20">
             <CardContent className="p-4">
               <p className="text-white text-sm font-medium mb-2">Demo Credentials:</p>
-              <p className="text-gray-300 text-xs">Email: demo@recruitix.com</p>
+              <p className="text-gray-300 text-xs">Email: demo@hirex.ai</p>
               <p className="text-gray-300 text-xs">Password: demo123</p>
             </CardContent>
           </Card>
@@ -133,11 +133,11 @@ const AuthPage = ({ onBack, onAuthSuccess }: AuthPageProps) => {
           <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white/20 mb-6 shadow-lg mx-auto">
             <img 
               src="/brain-logo.png" 
-              alt="Recruitix Logo"
+              alt="Hirex Logo"
               className="w-8 h-8 object-contain"
             />
           </div>
-          <CardTitle className="text-2xl text-white">Join Recruitix</CardTitle>
+          <CardTitle className="text-2xl text-white">Join Hirex</CardTitle>
           <CardDescription className="text-gray-300">
             Create your account to get started
           </CardDescription>

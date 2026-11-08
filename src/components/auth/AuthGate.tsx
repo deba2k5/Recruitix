@@ -54,7 +54,7 @@ const AuthGate = ({ onBack, onAuthenticated }: AuthGateProps) => {
       <div className="w-full max-w-md">
         <Card className="bg-slate-900 border-slate-700">
           <CardHeader className="space-y-3 text-center">
-            <CardTitle className="text-2xl text-white">Recruitix Account</CardTitle>
+            <CardTitle className="text-2xl text-white">Hirex Account</CardTitle>
             <CardDescription className="text-slate-300">
               {mode === 'signup'
                 ? 'Create your candidate account'

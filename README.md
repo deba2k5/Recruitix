@@ -120,12 +120,16 @@ Production, Preview, and Development environments:
 MONGODB_URI=mongodb+srv://o24debangshu_db_user:<url_encoded_password>@portfolio1.xixjqhr.mongodb.net/recruitix?retryWrites=true&w=majority
 JWT_SECRET=<a_long_random_secret>
 VITE_API_BASE_URL=
+ADMIN_EMAIL=admin@gmail.com
+ADMIN_PASSWORD=admin123
 ```
 
 Replace `<url_encoded_password>` with the Atlas database user's password. If the
 password contains characters such as `@`, `:`, `/`, or `#`, URL-encode it first.
 Do not commit the completed URI or `JWT_SECRET` to the repository. After saving
 the variables, redeploy the Vercel project and verify `/api/health`.
+The admin dashboard uses these credentials to issue a role-protected recruiter token
+for viewing registered candidates, assessment progress, reports, and integrity flags.
 
 -----
 

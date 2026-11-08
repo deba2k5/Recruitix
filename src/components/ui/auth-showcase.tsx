@@ -154,7 +154,7 @@ export function AuthShowcase() {
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">Email:</span>
-                  <span className="font-mono">demo@recruitix.com</span>
+                  <span className="font-mono">demo@hirex.ai</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">Password:</span>

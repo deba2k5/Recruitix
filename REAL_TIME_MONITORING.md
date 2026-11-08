@@ -107,7 +107,7 @@ Updated with:
 
 Only users authenticated with the following credentials can access the monitoring dashboard:
 - **Email**: `admin@gmail.com`
-- **Password**: `admin@1234`
+- **Password**: `admin123`
 
 These are validated through Firebase Authentication.
 

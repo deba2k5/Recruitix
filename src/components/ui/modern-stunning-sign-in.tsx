@@ -56,7 +56,7 @@ const ModernStunningSignIn = ({
         <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white/20 mb-6 shadow-lg">
           <img 
             src="/brain-logo.png" 
-            alt="Recruitix Logo"
+            alt="Hirex Logo"
             className="w-8 h-8 object-contain"
             onError={(e) => {
               // Fallback to Brain icon if image fails to load
@@ -68,7 +68,7 @@ const ModernStunningSignIn = ({
         </div>
 
         {/* Title */}
-        <h2 className="text-2xl font-semibold text-white mb-6 text-center">Recruitix</h2>
+        <h2 className="text-2xl font-semibold text-white mb-6 text-center">Hirex</h2>
 
         {/* Form */}
         <div className="flex flex-col w-full gap-4">
@@ -138,7 +138,7 @@ const ModernStunningSignIn = ({
       <div className="relative z-10 mt-12 flex flex-col items-center text-center">
         <p className="text-gray-400 text-sm mb-2">
           Join <span className="font-medium text-white">thousands</span> of
-          companies who are already using Recruitix.
+          companies who are already using Hirex.
         </p>
         <div className="flex -space-x-2">
           <img

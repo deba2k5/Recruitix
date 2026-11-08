@@ -101,7 +101,7 @@ const AuthSystem = ({ onLogin, onBack }: AuthSystemProps) => {
           </CardTitle>
           <CardDescription className="dark:text-slate-300">
             {authMode === 'login' && 'Sign in to your account'}
-            {authMode === 'signup' && 'Create your Recruitix account'}
+            {authMode === 'signup' && 'Create your Hirex account'}
             {authMode === 'forgot' && 'Enter your email to reset password'}
             {authMode === 'otp' && 'Enter the 6-digit code sent to your email'}
           </CardDescription>

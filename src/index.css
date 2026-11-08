@@ -53,6 +53,105 @@
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
+  @keyframes hirex-grid-shift {
+    from { background-position: 0 0, 0 0; }
+    to { background-position: 48px 48px, 48px 48px; }
+  }
+
+  .hirex-home {
+    position: relative;
+    isolation: isolate;
+    background-color: #111;
+    background-image: linear-gradient(rgba(0,0,0,.28), rgba(0,0,0,.42)), url('/hirex-gradient.jpg');
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
+  }
+
+  .hirex-footer {
+    background-image: url('/hirex-gradient.jpg');
+    background-position: center;
+    background-size: cover;
+    background-attachment: fixed;
+  }
+
+  .hirex-home::before {
+    position: absolute;
+    content: '';
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgba(0,0,0,.22), rgba(0,0,0,.58) 68%, rgba(0,0,0,.78));
+  }
+
+  .glass-panel {
+    -webkit-backdrop-filter: blur(26px) saturate(115%);
+    backdrop-filter: blur(26px) saturate(115%);
+    transition: transform 500ms cubic-bezier(.2,.8,.2,1), box-shadow 500ms ease;
+  }
+
+  .glass-panel:hover {
+    box-shadow: 0 30px 90px rgba(255,255,255,.08), inset 0 1px 0 rgba(255,255,255,.2);
+  }
+
+  .floating-nav {
+    box-shadow: 0 18px 55px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.12);
+  }
+
+  .hirex-button {
+    position: relative;
+    min-width: 156px;
+    border: 1px solid rgba(255,255,255,.7);
+    box-shadow:
+      0 8px 0 rgba(150,150,150,.22),
+      0 16px 30px rgba(0,0,0,.28),
+      inset 0 1px 0 rgba(255,255,255,.95);
+    transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+  }
+
+  .hirex-button:hover {
+    transform: translateY(-3px);
+    box-shadow:
+      0 11px 0 rgba(150,150,150,.18),
+      0 22px 38px rgba(0,0,0,.38),
+      inset 0 1px 0 rgba(255,255,255,.95);
+  }
+
+  .hirex-button:active {
+    transform: translateY(3px);
+    box-shadow:
+      0 3px 0 rgba(150,150,150,.22),
+      0 8px 16px rgba(0,0,0,.25),
+      inset 0 1px 0 rgba(255,255,255,.85);
+  }
+
+  .hirex-button-hero {
+    min-width: 220px;
+  }
+
+  .hirex-button-wide {
+    min-width: 100%;
+  }
+
+  .hirex-button-small {
+    min-width: 164px;
+  }
+
+  .hirex-mountain-layer {
+    transition: transform 700ms cubic-bezier(.2,.8,.2,1);
+    will-change: transform;
+  }
+
+  #platform:hover .hirex-mountain-layer {
+    transform: translateY(-6px) scale(1.04) !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hirex-home,
+    .hirex-mountain-layer { animation: none; transition: none; }
+  }
+
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;

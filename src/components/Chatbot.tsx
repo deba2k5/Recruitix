@@ -8,12 +8,12 @@ import { MessageSquare, X, Send, Bot, User } from 'lucide-react';
 const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { id: 1, text: "Hi! I'm your Recruitix assistant. How can I help you today?", sender: 'bot' }
+    { id: 1, text: "Hi! I'm your Hirex assistant. How can I help you today?", sender: 'bot' }
   ]);
   const [inputText, setInputText] = useState('');
 
   const responses: Record<string, string> = {
-    'hello': "Hello! Welcome to Recruitix. I can help you navigate through the platform.",
+    'hello': "Hello! Welcome to Hirex. I can help you navigate through the platform.",
     'help': "I can assist you with: 1) Understanding the assessment process 2) Technical requirements 3) How to prepare for interviews 4) Platform navigation",
     'assessment': "Our assessment has 3 rounds: Technical (25 questions), Live Interview (10 coding problems), and HR Simulation (10 behavioral questions). You can access any round at any time!",
     'technical': "The technical round includes DSA, aptitude, and quantitative questions. No minimum score required to proceed!",
@@ -24,7 +24,7 @@ const Chatbot = () => {
     'forgot': "Click 'Forgot Password' on the login page and we'll send you a reset link via email.",
     'dashboard': "Recruiters can track candidate progress in real-time through our comprehensive dashboard.",
     'theme': "You can toggle between light and dark themes using the theme button in the top navigation.",
-    'default': "I'm here to help! You can ask me about assessments, login issues, platform features, or anything else about Recruitix."
+    'default': "I'm here to help! You can ask me about assessments, login issues, platform features, or anything else about Hirex."
   };
 
   const handleSendMessage = () => {
@@ -68,7 +68,7 @@ const Chatbot = () => {
           <CardHeader className="flex flex-row items-center justify-between p-4 bg-blue-500 text-white rounded-t-lg">
             <div className="flex items-center space-x-2">
               <Bot className="w-5 h-5" />
-              <CardTitle className="text-sm">Recruitix Assistant</CardTitle>
+              <CardTitle className="text-sm">Hirex Assistant</CardTitle>
             </div>
             <Button
               variant="ghost"

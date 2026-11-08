@@ -37,33 +37,34 @@ export const Footer = ({
   className,
 }: FooterProps) => {
   return (
-    <section className={cn("relative w-full mt-0 overflow-hidden", className)}>
-      <footer className="border-t bg-background mt-20 relative">
-        <div className="max-w-7xl flex flex-col justify-between mx-auto min-h-[30rem] sm:min-h-[35rem] md:min-h-[40rem] relative p-4 py-10">
-          <div className="flex flex-col mb-12 sm:mb-20 md:mb-0 w-full">
+    <section className={cn("hirex-footer relative w-full mt-0 overflow-hidden", className)}>
+      <footer className="relative mt-20 overflow-hidden border-t border-white/20 bg-black/55 text-white">
+        <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-black/45 to-black/80" />
+        <div className="relative mx-auto flex min-h-[30rem] max-w-7xl flex-col justify-between p-5 py-12 sm:min-h-[35rem] sm:p-8 sm:py-14 md:min-h-[40rem]">
+          <div className="flex w-full flex-col">
             <div className="w-full flex flex-col items-center">
-              <div className="space-y-2 flex flex-col items-center flex-1">
+              <div className="flex flex-1 flex-col items-center space-y-3">
                 <div className="flex items-center gap-2">
-                  <span className="text-foreground text-3xl font-bold">
+                  <span className="text-3xl font-bold tracking-tight text-white">
                     {brandName}
                   </span>
                 </div>
-                <p className="text-muted-foreground font-semibold text-center w-full max-w-sm sm:w-96 px-4 sm:px-0">
+                <p className="w-full max-w-sm px-4 text-center font-medium leading-7 text-white/65 sm:w-96 sm:px-0">
                   {brandDescription}
                 </p>
               </div>
 
               {socialLinks.length > 0 && (
-                <div className="flex mb-8 mt-3 gap-4">
+                <div className="mt-6 mb-8 flex gap-3">
                   {socialLinks.map((link, index) => (
                     <a
                       key={index}
                       href={link.href}
-                      className="text-muted-foreground hover:text-foreground transition-colors"
+                      className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white/65 backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:border-white/40 hover:bg-white/20 hover:text-white"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      <div className="w-6 h-6 hover:scale-110 duration-300">
+                      <div className="h-5 w-5">
                         {link.icon}
                       </div>
                       <span className="sr-only">{link.label}</span>
@@ -73,11 +74,11 @@ export const Footer = ({
               )}
 
               {navLinks.length > 0 && (
-                <div className="flex flex-wrap justify-center gap-4 text-sm font-medium text-muted-foreground max-w-full px-4">
+                <div className="flex flex-wrap justify-center gap-2 text-sm font-medium text-white/65">
                   {navLinks.map((link, index) => (
                     <a
                       key={index}
-                      className="hover:text-foreground duration-300 hover:font-semibold"
+                      className="rounded-full border border-white/10 bg-white/[.06] px-4 py-2 transition duration-300 hover:border-white/30 hover:bg-white/15 hover:text-white"
                       href={link.href}
                     >
                       {link.label}
@@ -88,8 +89,8 @@ export const Footer = ({
             </div>
           </div>
 
-          <div className="mt-20 md:mt-24 flex flex-col gap-2 md:gap-1 items-center justify-center md:flex-row md:items-center md:justify-between px-4 md:px-0">
-            <p className="text-base text-muted-foreground text-center md:text-left">
+          <div className="mt-20 flex flex-col items-center justify-between gap-3 border-t border-white/15 pt-5 text-center md:flex-row md:text-left">
+            <p className="text-sm text-white/55">
               © {new Date().getFullYear()} {brandName}. All rights reserved.
             </p>
             {creatorName && creatorUrl && (
@@ -97,7 +98,7 @@ export const Footer = ({
                 <a
                   href={creatorUrl}
                   target="_blank"
-                  className="text-base text-muted-foreground hover:text-foreground transition-colors duration-300 hover:font-medium"
+                  className="text-sm text-white/55 transition-colors duration-300 hover:text-white"
                 >
                   Crafted by {creatorName}
                 </a>
@@ -108,7 +109,7 @@ export const Footer = ({
 
         {/* Large background text */}
         <div
-          className="bg-gradient-to-b from-foreground/20 via-foreground/10 to-transparent bg-clip-text text-transparent leading-none absolute left-1/2 -translate-x-1/2 bottom-40 md:bottom-32 font-extrabold tracking-tighter pointer-events-none select-none text-center px-4"
+          className="pointer-events-none absolute bottom-40 left-1/2 -translate-x-1/2 select-none bg-gradient-to-b from-white/20 via-white/10 to-transparent bg-clip-text px-4 text-center font-extrabold leading-none tracking-tighter text-transparent md:bottom-32"
           style={{
             fontSize: 'clamp(3rem, 12vw, 10rem)',
             maxWidth: '95vw',
@@ -118,19 +119,19 @@ export const Footer = ({
         </div>
 
         {/* Bottom logo */}
-        <div className="absolute hover:border-foreground duration-400 drop-shadow-[0_0px_20px_rgba(0,0,0,0.5)] dark:drop-shadow-[0_0px_20px_rgba(255,255,255,0.3)] bottom-24 md:bottom-20 backdrop-blur-sm rounded-3xl bg-background/60 left-1/2 border-2 border-border flex items-center justify-center p-3 -translate-x-1/2 z-10">
-          <div className="w-12 sm:w-16 md:w-24 h-12 sm:h-16 md:h-24 bg-gradient-to-br from-foreground to-foreground/80 rounded-2xl flex items-center justify-center shadow-lg">
+        <div className="absolute bottom-24 left-1/2 z-10 flex -translate-x-1/2 items-center justify-center rounded-[1.75rem] border border-white/25 bg-black/35 p-3 shadow-2xl backdrop-blur-xl transition duration-500 hover:-translate-y-2 hover:border-white/50 md:bottom-20">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/20 bg-white shadow-lg sm:h-16 sm:w-16 md:h-24 md:w-24">
             {brandIcon || (
-              <Brain className="w-8 sm:w-10 md:w-14 h-8 sm:h-10 md:h-14 text-background drop-shadow-lg" />
+              <Brain className="h-8 w-8 text-black drop-shadow-lg sm:h-10 sm:w-10 md:h-14 md:w-14" />
             )}
           </div>
         </div>
 
         {/* Bottom line */}
-        <div className="absolute bottom-32 sm:bottom-34 backdrop-blur-sm h-1 bg-gradient-to-r from-transparent via-border to-transparent w-full left-1/2 -translate-x-1/2"></div>
+        <div className="absolute bottom-32 left-1/2 h-px w-full -translate-x-1/2 bg-gradient-to-r from-transparent via-white/30 to-transparent backdrop-blur-sm sm:bottom-34"></div>
 
         {/* Bottom shadow */}
-        <div className="bg-gradient-to-t from-background via-background/80 blur-[1em] to-background/40 absolute bottom-28 w-full h-24"></div>
+        <div className="absolute bottom-28 h-24 w-full bg-gradient-to-t from-black via-black/70 to-transparent blur-[1em]"></div>
       </footer>
     </section>
   );

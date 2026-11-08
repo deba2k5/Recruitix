@@ -5,7 +5,7 @@ import { Users, Shield, Code, Brain } from "lucide-react";
 export function AnimatedPinDemo() {
   return (
     <div className="h-[40rem] w-full flex items-center justify-center bg-white dark:bg-black">
-      <PinContainer title="Explore Recruitix" href="/candidate">
+      <PinContainer title="Explore Hirex" href="/candidate">
         <div className="flex flex-col p-4 tracking-tight text-gray-100/50 w-[20rem] h-[20rem] bg-gradient-to-b from-gray-800/50 to-gray-800/0 backdrop-blur-sm border border-gray-700/50 rounded-2xl">
           {/* Header */}
           <div className="flex items-center gap-2">

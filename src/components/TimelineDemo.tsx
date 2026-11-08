@@ -9,7 +9,7 @@ export function TimelineDemo() {
       content: (
         <div>
           <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal mb-8">
-            Launched Recruitix AI with advanced proctoring, semantic analysis, and real-time monitoring capabilities
+            Launched Hirex AI with advanced proctoring, semantic analysis, and real-time monitoring capabilities
           </p>
           <div className="grid grid-cols-2 gap-4">
             <img
