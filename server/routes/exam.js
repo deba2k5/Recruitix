@@ -4,7 +4,6 @@ import { getDb, getSnapshotBucket, getRecordingBucket } from '../db.js';
 import { requireAuth } from '../middleware/auth.js';
 import { isValidEmbedding, euclideanDistance, THRESHOLD } from '../lib/faceMatch.js';
 import { asyncHandler } from '../lib/asyncHandler.js';
-import { PDFParse } from 'pdf-parse';
 
 const router = express.Router();
 
@@ -308,6 +307,7 @@ router.post('/sessions/:id/responses', requireAuth, loadOwnedSession, asyncHandl
       if (contentType !== 'application/pdf' && !fileName.toLowerCase().endsWith('.pdf')) {
         return res.status(400).json({ error: 'invalid_input', detail: 'Binary CV uploads must be PDF files.' });
       }
+      const { PDFParse } = await import('pdf-parse');
       const parser = new PDFParse({ data: Buffer.from(fileBase64, 'base64') });
       const parsed = await parser.getText();
       await parser.destroy();
